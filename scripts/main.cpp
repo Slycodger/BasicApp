@@ -7,11 +7,10 @@
 #include "objScripts.h"
 #include "MathConstants.h"
 
-uint SVBO, SEBO, StriCount;
-uint TVBO, TEBO, TtriCount;
-uint VBO, EBO, triCount;
+static uint SVBO, SEBO, StriCount;
+static uint VBO, EBO, triCount;
 
-Object* obj = nullptr;
+static Object* obj = nullptr;
 
 struct tempScript : public scriptBase {
 	bool color = true;
@@ -50,9 +49,6 @@ void progStart() {
 	createBufferObj(SVBO, SEBO, squareVertices, squareIndices, sizeof(squareVertices), sizeof(squareIndices));
 	StriCount = 6;
 
-	createBufferObj(TVBO, TEBO, triangleVertices, triangleIndices, sizeof(triangleVertices), sizeof(triangleIndices));
-	TtriCount = 3;
-
 	VBO = SVBO;
 	EBO = SEBO;
 	triCount = StriCount;
@@ -60,30 +56,15 @@ void progStart() {
 	loadBufferObj("myObj", &VBO, &EBO, &triCount);
 
 	obj = createObj("myObj");
-	addObjScript(obj, (void*)(new tempScript));
 }
 
 bool shape = false;
 
 void progMain() {
-	if (keyAction::keyPressed(GLFW_KEY_SPACE)) {
-		if (!shape) {
-			VBO = TVBO;
-			EBO = TEBO;
-			triCount = TtriCount;
-			shape = true;
-		} else {
-			VBO = SVBO;
-			EBO = SEBO;
-			triCount = StriCount;
-			shape = false;
-		}
-	}
+
 }
 
 void progEnd() {
 	glDeleteBuffers(1, &SVBO);
 	glDeleteBuffers(1, &SEBO);
-	glDeleteBuffers(1, &TVBO);
-	glDeleteBuffers(1, &TEBO);
 }

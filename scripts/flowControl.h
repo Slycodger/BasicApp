@@ -12,6 +12,7 @@
 #include "Constants.h"
 #include "MathConstants.h"
 #include "objScripts.h"
+#include "text.h"
 #endif
 
 void start();

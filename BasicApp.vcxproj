@@ -71,6 +71,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\BasicAppBuilds\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -105,15 +108,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\glad\include;C:\Users\gabri\Desktop\Desktop\Coding\CPPProjects\BasicApp\glm;.\glfw-3.4.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;C:\Users\gabri\Desktop\Desktop\Coding\CPPProjects\BasicApp\freeTypeInclude;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>.\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\lib-vc2022;.\freeTypeDLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,13 +132,20 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\gabri\Desktop\Desktop\Coding\CPPProjects\BasicApp\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>xcopy $(ProjectDir)shaders $(OutDir)shaders /y /i /e /s</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glad\src\glad.c" />
@@ -144,10 +154,15 @@
     <ClCompile Include="scripts\main.cpp" />
     <ClCompile Include="scripts\Objects.cpp" />
     <ClCompile Include="scripts\programControl.cpp" />
+    <ClCompile Include="scripts\text.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\fragmentShader.frag" />
-    <None Include="shaders\vertexShader.vert" />
+    <None Include="shaders\NTFragmentShader.frag" />
+    <None Include="shaders\NTVertexShader.vert" />
+    <None Include="shaders\TextFragmentShader.frag" />
+    <None Include="shaders\TextVertexShader.vert" />
+    <None Include="shaders\TFragmentShader.frag" />
+    <None Include="shaders\TVertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scripts\objScripts.h" />
@@ -161,6 +176,7 @@
     <ClInclude Include="scripts\OpenGL.h" />
     <ClInclude Include="scripts\programControl.h" />
     <ClInclude Include="scripts\Shapes.h" />
+    <ClInclude Include="scripts\text.h" />
     <ClInclude Include="scripts\typeDefs.h" />
     <ClInclude Include="scripts\Vector.h" />
   </ItemGroup>

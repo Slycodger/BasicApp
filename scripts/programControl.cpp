@@ -1,5 +1,6 @@
 #define _PROGRAM_CONTROL
 #include "programControl.h"
+#include "Windows.h"
 
 
 uint _Width = 1280;
@@ -44,4 +45,11 @@ int main() {
 	end();
 
 	return 1;
+}
+
+
+
+//Windows only
+static int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR pCmdLine, _In_ int nCmdShow) {
+	main();
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "OpenGL.h"
+#include "typeDefs.h"
 
 
 struct Vec3 {
@@ -153,6 +154,34 @@ struct iVec2 {
 		t = &y;
 	}
 	iVec2(int m, int n) : x(m), y(n) {
+		r = &x;
+		g = &y;
+		s = &x;
+		t = &y;
+	}
+};
+
+struct uiVec2 {
+	uint x = 0;
+	uint y = 0;
+	uint* r = nullptr;
+	uint* g = nullptr;
+	uint* s = nullptr;
+	uint* t = nullptr;
+
+	uiVec2() : x(0), y(0) {
+		r = &x;
+		g = &y;
+		s = &x;
+		t = &y;
+	}
+	uiVec2(uint val) : x(val), y(val) {
+		r = &x;
+		g = &y;
+		s = &x;
+		t = &y;
+	}
+	uiVec2(uint m, uint n) : x(m), y(n) {
 		r = &x;
 		g = &y;
 		s = &x;

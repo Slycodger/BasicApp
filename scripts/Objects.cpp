@@ -3,7 +3,7 @@
 
 bool addGlobalObj(ObjectBase*&);
 
-std::map<std::string, std::tuple<uint*, uint*, uint*>> objTypes;
+static std::map<std::string, std::tuple<uint*, uint*, uint*>> objTypes;
 
 //Creates the buffers for an object
 void createBufferObj(uint& VBO, uint& EBO, const float vertices[], const uint indices[], const size_t vertSize, const size_t indiceSize) {

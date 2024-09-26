@@ -6,34 +6,36 @@ void progEnd();
 
 Vec3 bgColor = Vec3(0);
 
-uint VAO;
-Shader myShader;
+static uint VAO;
+static Shader myShader;
 
 glm::mat4 transform(1);
 glm::mat4 view(1);
 glm::mat4 projection(1);
 
 
-ObjectBase* globalObjects[_MAX_OBJECTS];
-uint objCount = 0;
+static ObjectBase* globalObjects[_MAX_OBJECTS];
+static uint objCount = 0;
 
+static uint myText = 0;
 
 void start() {
-
+	fontStart();
 	for (uint i = 0; i < _MAX_OBJECTS; i++) {
 		globalObjects[i] = nullptr;
 	}
 
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	glBindVertexArray(0);
-
-	myShader.createShader("./shaders/vertexShader.vert", "./shaders/fragmentShader.frag");
+	myShader.createShader("./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
 
 	projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	progStart();
+
+	if (!loadFont("./fonts/font.ttf", "font")) {
+		std::cout << "Failed to load fonts\n";
+	}
+
+	createTextTexture(myText, "M", 1, 1, 1, TEXT_LEFT_RENDER);
 }
 
 void update() {
@@ -52,6 +54,7 @@ void end() {
 	progEnd();
 	deleteAll();
 	deleteObjMapping();
+	fontEnd();
 }
 
 
@@ -91,14 +94,21 @@ void drawAllObjs() {
 		transform = glm::scale(transform, glm::vec3(obj->scale.toGLM(), 1));
 
 		myShader.setMat4("transform", glm::value_ptr(transform));
-		myShader.setVec3("inColor", obj->color);
+		myShader.setInt("texTarget", 0);
+		myShader.setVec3("color", 1, 0, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, myText);
+
+
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, *globalObjects[i]->VBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *globalObjects[i]->EBO);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
 
 		glDrawElements(GL_TRIANGLES, *globalObjects[i]->triCount, GL_UNSIGNED_INT, 0);
 		objDrawn++;
