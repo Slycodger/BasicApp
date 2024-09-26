@@ -90,26 +90,34 @@ cChar getChar(std::string name, char character) {
 	return programFonts[name][character];
 }
 
-void createTextTexture(uint& texture, std::string text, float lineSize, float width, float ratio, uint mode) {
+void createTextTexture(uint& texture, std::string font, std::string text, float lineSize, float width, float ratio, uint mode) {
+	uint screenX = width * _Width;
+	uint screenY = width * _Width / ratio;
+	Vec2 textScale = { lineSize, 1 / _screenRatio / ratio * lineSize };
+
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width * _Width, ratio / width * _Width, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenX, screenY, 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-	glViewport(0, 0, width * _Width, ratio / width * _Width);
+	glViewport(0, 0, screenX, screenY);
 	glBindVertexArray(VAO);
-	
-	cChar curChar = getChar("font_LARGE", text[0]);
-	float size = curChar.size.y * lineSize;
 	textShader.use();
 	textShader.setInt("texTarget", 0);
+	cChar curChar;
+	Vec2 pos = { -_screenRatio, 1 };
+
+
+	curChar = getChar(font, text[0]);
 	glActiveTexture(0);
 	glBindTexture(GL_TEXTURE_2D, curChar.texTarget);
 
+
 	transform = glm::mat4(1);
-	transform = glm::scale(transform, glm::vec3(1, size, 1));
+	transform = glm::translate(transform, glm::vec3(pos.toGLM(), 1));
+	transform = glm::scale(transform, glm::vec3(curChar.size.x * textScale.x, curChar.size.y * textScale.y, 1));
 
 	textShader.setMat4("transform", glm::value_ptr(transform));
 	textShader.setMat4("projection", glm::value_ptr(projection));

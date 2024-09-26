@@ -34,6 +34,6 @@ struct cChar {
 
 bool loadFont(std::string font, std::string name);
 cChar getChar(std::string name, char character);
-void createTextTexture(uint& texture, std::string text, float lineSize, float width, float height, uint mode);
+void createTextTexture(uint& texture, std::string font, std::string text, float lineSize, float width, float height, uint mode);
 void fontStart();
 void fontEnd();

@@ -131,6 +131,21 @@ struct Vec2 {
 
 		return *this;
 	}
+	Vec2& operator +=(const Vec2 val) {
+		this->x += val.x;
+		this->y += val.y;
+		return *this;
+	}
+	Vec2& operator *=(const Vec2 val) {
+		this->x *= val.x;
+		this->y *= val.y;
+		return *this;
+	}
+	Vec2 operator *(const Vec2 val) {
+		Vec2 temp = *this;
+		temp *= val;
+		return temp;
+	}
 };
 
 struct iVec2 {

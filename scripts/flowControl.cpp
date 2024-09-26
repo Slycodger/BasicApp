@@ -35,7 +35,7 @@ void start() {
 		std::cout << "Failed to load fonts\n";
 	}
 
-	createTextTexture(myText, "M", 1, 1, 1, TEXT_LEFT_RENDER);
+	createTextTexture(myText,"font_LARGE", "a", 0.3, 1, 1, TEXT_LEFT_RENDER);
 }
 
 void update() {
@@ -220,8 +220,8 @@ unsigned int getObjScriptIndex(Object*& obj, std::string name) {
 		if (realScr->name == name) {
 			return i;
 		}
-		return UINT_MAX;
 	}
+	return UINT_MAX;
 }
 
 //Calls the update function on all scripts for an object
