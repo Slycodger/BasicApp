@@ -16,24 +16,22 @@
 #include <string>
 
 #define TEXT_LEFT_RENDER 0
-#define TEXT_RIGHT_RENDER 1
-#define TEXT_CENTER_RENDER 2
-#define TEXT_LEFT_STRAIGHT_RENDER 3;
-#define TEXT_RIGHT_STRAIGHT_RENDER 4;
+#define TEXT_CENTER_RENDER 1
+
 
 struct cChar {
 	uint texTarget;
 	Vec2 bearing;
 	Vec2 size;
-	int advance;
+	double advance;
 
 	cChar() : texTarget(0), bearing(0), size(0), advance(0) {}
-	cChar(uint tex, Vec2 b, Vec2 s, float a) : texTarget(tex), bearing(b), size(s), advance(a) {}
+	cChar(uint tex, Vec2 b, Vec2 s, double a) : texTarget(tex), bearing(b), size(s), advance(a) {}
 };
 
 
 bool loadFont(std::string font, std::string name);
 cChar getChar(std::string name, char character);
-void createTextTexture(uint& texture, std::string font, std::string text, float lineSize, float width, float height, uint mode);
+void createTextTexture(uint& texture, float fontSize, float lineSize, char sharpness, float width, float height, uint mode, std::string font, std::string text);
 void fontStart();
 void fontEnd();

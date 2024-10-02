@@ -34,13 +34,16 @@ void start() {
 	if (!loadFont("./fonts/font.ttf", "font")) {
 		std::cout << "Failed to load fonts\n";
 	}
-
-	createTextTexture(myText,"font_LARGE", "a", 0.3, 1, 1, TEXT_LEFT_RENDER);
 }
 
 void update() {
 
 	progMain();
+
+	if (keyAction::keyPressed(GLFW_KEY_SPACE)) {
+		glDeleteTextures(1, &myText);
+		createTextTexture(myText, 0.03, 0.034, 3, 1.5, 1, TEXT_LEFT_RENDER, "font_SMALL", "Hey, all you Goobers\nIt's time to say howdy to your favorite undersea peanut, Goofy Goober\n(Yeah)\n(Yeah)\n(Yeah)\n\nAlright, folks, this one goes out to my two bestest friends in the whole world\nPatrick and this big peanut guy\nIt's a little ditty called\nGoofy Goober (yeah)\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\n\nDJ (yeah), time for the test (yeah)\nNo baby can resist singin' along to this (yeah)\n(Yeah, yeah)\n(Yeah, yeah)\n(Yeah, yeah)\n\nSpongeBob, it's the Goofy Goober theme song\nI know\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah\n\nAnd here's your Triple Gooberberry Sunrise, sir\nOoh\nOh, Triple Gooberberry Sunrise, huh?\nI guess I could use one of those\nThere you go\n\nBoy, Pat, that hit the spot\nI'm feeling better already\nYeah\nWaiter, let's get another round over here\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)");
+	}
 
 	glClearColor(*bgColor.r, *bgColor.g, *bgColor.b, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -171,6 +174,7 @@ void windowScaled(GLFWwindow* window, int width, int height) {
 	_Height = height;
 	_screenRatio = (float)_Width / _Height;
 	glViewport(0, 0, width, height);
+	projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
 }
 void mouseMove(GLFWwindow* window, double xpos, double ypos) {
 	mousePosX = xpos / _Height * 2 - _screenRatio;

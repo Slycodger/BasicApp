@@ -56,6 +56,7 @@ void progStart() {
 	loadBufferObj("myObj", &VBO, &EBO, &triCount);
 
 	obj = createObj("myObj");
+	obj->scale.x = (float)16 / 9;
 }
 
 bool shape = false;

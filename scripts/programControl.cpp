@@ -3,7 +3,7 @@
 #include "Windows.h"
 
 
-uint _Width = 1280;
+uint _Width = 720;
 uint _Height = 720;
 float _screenRatio = (float)_Width / _Height;
 double mousePosX = 0;
@@ -33,6 +33,9 @@ int main() {
 	}
 
 	start();
+
+
+	glEnable(GL_BLEND);
 
 	while (!glfwWindowShouldClose(mainWindow)) 
 	{

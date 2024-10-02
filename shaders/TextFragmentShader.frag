@@ -4,5 +4,5 @@ in vec2 uvCoord;
 uniform sampler2D texTarget;
 
 void main() {
-	fragColor = vec4(1, 1, 1, 1) * texture(texTarget, vec2(uvCoord.x, -uvCoord.y)).r;
+	fragColor = vec4(1) * texture(texTarget, vec2(uvCoord.x, uvCoord.y)).r;
 }
