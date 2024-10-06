@@ -167,6 +167,7 @@ xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s</Command>
     <None Include="shaders\TVertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="scripts\globalScripts.h" />
     <ClInclude Include="scripts\objScripts.h" />
     <ClInclude Include="scripts\Constants.h" />
     <ClInclude Include="scripts\Objects.h" />

@@ -7,11 +7,14 @@ void progEnd();
 Vec3 bgColor = Vec3(0);
 
 static uint VAO;
-static Shader myShader;
+static Shader basicShader;
+static Shader textureShader;
 
 glm::mat4 transform(1);
 glm::mat4 view(1);
 glm::mat4 projection(1);
+
+bool windowScaled = false;
 
 
 static ObjectBase* globalObjects[_MAX_OBJECTS];
@@ -25,30 +28,24 @@ void start() {
 		globalObjects[i] = nullptr;
 	}
 
-	myShader.createShader("./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
+	basicShader.createShader("./shaders/NTVertexShader.vert", "./shaders/NTFragmentShader.frag");
+	textureShader.createShader("./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
 
 	projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	progStart();
-
-	if (!loadFont("./fonts/font.ttf", "font")) {
-		std::cout << "Failed to load fonts\n";
-	}
 }
 
 void update() {
 
 	progMain();
 
-	if (keyAction::keyPressed(GLFW_KEY_SPACE)) {
-		glDeleteTextures(1, &myText);
-		createTextTexture(myText, 0.03, 0.034, 3, 1.5, 1, TEXT_LEFT_RENDER, "font_SMALL", "Hey, all you Goobers\nIt's time to say howdy to your favorite undersea peanut, Goofy Goober\n(Yeah)\n(Yeah)\n(Yeah)\n\nAlright, folks, this one goes out to my two bestest friends in the whole world\nPatrick and this big peanut guy\nIt's a little ditty called\nGoofy Goober (yeah)\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\n\nDJ (yeah), time for the test (yeah)\nNo baby can resist singin' along to this (yeah)\n(Yeah, yeah)\n(Yeah, yeah)\n(Yeah, yeah)\n\nSpongeBob, it's the Goofy Goober theme song\nI know\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah\n\nAnd here's your Triple Gooberberry Sunrise, sir\nOoh\nOh, Triple Gooberberry Sunrise, huh?\nI guess I could use one of those\nThere you go\n\nBoy, Pat, that hit the spot\nI'm feeling better already\nYeah\nWaiter, let's get another round over here\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)");
-	}
-
 	glClearColor(*bgColor.r, *bgColor.g, *bgColor.b, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	drawAllObjs();
+
+	windowScaled = false;
 
 	giveKeyAction::latchSet();
 }
@@ -74,11 +71,6 @@ void setBgColor(float r, float g, float b) {
 //---------------------OBJECT----HANDLING
 
 void drawAllObjs() {
-	myShader.use();
-
-	myShader.setMat4("view", glm::value_ptr(view));
-	myShader.setMat4("projection", glm::value_ptr(projection));
-
 	uint objDrawn = 0;
 
 	for (int i = 0; i < _MAX_OBJECTS; i++) {
@@ -95,14 +87,25 @@ void drawAllObjs() {
 		transform = glm::translate(transform, glm::vec3(obj->position.toGLM(), 1));
 		transform = glm::rotate(transform, (float)degToRad * obj->rotation, glm::vec3(0, 0, 1));
 		transform = glm::scale(transform, glm::vec3(obj->scale.toGLM(), 1));
-
-		myShader.setMat4("transform", glm::value_ptr(transform));
-		myShader.setInt("texTarget", 0);
-		myShader.setVec3("color", 1, 0, 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, myText);
-
-
+		if (obj->usesTexture()) {
+			uint texTarget = obj->getTexture();
+			textureShader.use();
+			textureShader.setMat4("transform", glm::value_ptr(transform));
+			textureShader.setMat4("view", glm::value_ptr(view));
+			textureShader.setMat4("projection", glm::value_ptr(projection));
+			textureShader.setVec2("screenSize", _Width, _Height);
+			textureShader.setVec4("color", obj->color);
+			textureShader.setInt("texture", 0);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texTarget);
+		}
+		else {
+			basicShader.use();
+			basicShader.setMat4("transform", glm::value_ptr(transform));
+			basicShader.setMat4("view", glm::value_ptr(view));
+			basicShader.setMat4("projection", glm::value_ptr(projection));
+			basicShader.setVec4("color", obj->color);
+		}
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, *globalObjects[i]->VBO);
@@ -169,30 +172,31 @@ void deleteObj(Object*& obj) {
 
 //-------------------CALLBACKS
 
-void windowScaled(GLFWwindow* window, int width, int height) {
+void windowScaleCallback(GLFWwindow* window, int width, int height) {
 	_Width = width;
 	_Height = height;
 	_screenRatio = (float)_Width / _Height;
 	glViewport(0, 0, width, height);
 	projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+	windowScaled = true;
 }
-void mouseMove(GLFWwindow* window, double xpos, double ypos) {
+void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos) {
 	mousePosX = xpos / _Height * 2 - _screenRatio;
 	mousePosY = (_Height - ypos) / _Height * 2 - 1;
 }
-void keyPress(GLFWwindow* window, int button, int scancode, int action, int mods) {
+void keyPressCallback(GLFWwindow* window, int button, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS)
 		giveKeyAction::keyPressed(button);
 	else if (action == GLFW_RELEASE)
 		giveKeyAction::keyReleased(button);
 }
-void mouseScroll(GLFWwindow* window, double xoff, double yoff) {
+void mouseScrollCallback(GLFWwindow* window, double xoff, double yoff) {
 	if (yoff > 0)
 		giveKeyAction::scrolledUp();
 	else if (yoff < 0)
 		giveKeyAction::scrolledDown();
 }
-void mouseClick(GLFWwindow* window, int button, int action, int mods) {
+void mouseClickCallback(GLFWwindow* window, int button, int action, int mods) {
 	if (action == GLFW_PRESS)
 		giveKeyAction::keyPressed(button);
 	else if (action == GLFW_RELEASE)
@@ -213,6 +217,7 @@ void addObjScript(Object*& obj, void* script) {
 
 //Removes a specific script from object
 void removeObjScript(Object*& obj, unsigned int index) {
+	((scriptBase*)((ObjectBase*)obj)->scripts[index])->end();
 	delete(((ObjectBase*)obj)->scripts[index]);
 	((ObjectBase*)obj)->scripts.erase(((ObjectBase*)obj)->scripts.begin() + index);
 }
@@ -239,6 +244,7 @@ void updateObjScripts(Object*& obj) {
 //Clears all scripts from an object
 void clearObjScripts(Object*& obj) {
 	for (uint i = 0; i < ((ObjectBase*)obj)->scripts.size(); i++) {
+		((scriptBase*)((ObjectBase*)obj)->scripts[i])->end();
 		delete(((ObjectBase*)obj)->scripts[i]);
 	}
 	((ObjectBase*)obj)->scripts.clear();

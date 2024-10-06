@@ -2,6 +2,63 @@
 #include "OpenGL.h"
 #include "typeDefs.h"
 
+struct Vec4 {
+	float x = 0;
+	float y = 0;
+	float z = 0;
+	float w = 0;
+	float* r = nullptr;
+	float* g = nullptr;
+	float* b = nullptr;
+	float* a = nullptr;
+	float* s = nullptr;
+	float* t = nullptr;
+	float* p = nullptr;
+	float* q = nullptr;
+
+	Vec4() : x(0), y(0), z(0), w(0) {
+		r = &x;
+		g = &y;
+		b = &z;
+		a = &w;
+		s = &x;
+		t = &y;
+		p = &z;
+		q = &w;
+	}
+	Vec4(float val) : x(val), y(val), z(val), w(val) {
+		r = &x;
+		g = &y;
+		b = &z;
+		a = &w;
+		s = &x;
+		t = &y;
+		p = &z;
+		q = &w;
+	}
+	Vec4(float ant, float boat, float cat, float dog) : x(ant), y(boat), z(cat), w(dog) {
+		r = &x;
+		g = &y;
+		b = &z;
+		a = &w;
+		s = &x;
+		t = &y;
+		p = &z;
+		q = &w;
+	}
+
+	glm::vec4 toGLM() {
+		return glm::vec4(x, y, z, w);
+	}
+
+	Vec4& operator =(const Vec4& val) {
+		this->x = val.x;
+		this->y = val.y;
+		this->z = val.z;
+		this->w = val.w;
+		return *this;
+	}
+};
 
 struct Vec3 {
 	float x = 0;
@@ -145,6 +202,11 @@ struct Vec2 {
 		Vec2 temp = *this;
 		temp *= val;
 		return temp;
+	}
+	bool operator != (const Vec2 val) {
+		if (val.x == this->x && val.y == this->y)
+			return false;
+		return true;
 	}
 };
 

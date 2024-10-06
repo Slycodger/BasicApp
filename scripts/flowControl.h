@@ -17,11 +17,11 @@
 
 void start();
 void update();
-void windowScaled(GLFWwindow* window, int width, int height);
-void mouseMove(GLFWwindow* window, double xpos, double ypos);
-void mouseClick(GLFWwindow* window, int button, int action, int mods);
-void keyPress(GLFWwindow* window, int button, int scancode, int action, int mods);
-void mouseScroll(GLFWwindow* window, double xoff, double yoff);
+void windowScaleCallback(GLFWwindow* window, int width, int height);
+void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos);
+void mouseClickCallback(GLFWwindow* window, int button, int action, int mods);
+void keyPressCallback(GLFWwindow* window, int button, int scancode, int action, int mods);
+void mouseScrollCallback(GLFWwindow* window, double xoff, double yoff);
 void deleteObj(Object*& obj);
 void deleteObj(uint index);
 void deleteAll();

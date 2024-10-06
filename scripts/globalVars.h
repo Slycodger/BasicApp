@@ -11,3 +11,4 @@ extern Vec3 bgColor;
 extern glm::mat4 transform;
 extern glm::mat4 view;
 extern glm::mat4 projection;
+extern bool windowScaled;

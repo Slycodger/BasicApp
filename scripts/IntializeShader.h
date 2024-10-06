@@ -15,17 +15,32 @@ struct Shader {
 	void stop() {
 		glUseProgram(0);
 	}
+	void setUint(std::string name, uint value) {
+		glUniform1ui(glGetUniformLocation(ID, name.c_str()), value);
+	}
 	void setInt(std::string name, int value) {
 		glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 	}
 	void setFloat(std::string name, float value) {
 		glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 	}
+	void setVec2(std::string name, float x, float y) {
+		glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+	}
+	void setVecv2(std::string name, Vec2 vec) {
+		glUniform2f(glGetUniformLocation(ID, name.c_str()), vec.x, vec.y);
+	}
 	void setVec3(std::string name, float x, float y, float z) {
 		glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
 	}
 	void setVec3(std::string name, Vec3 vec) {
 		glUniform3f(glGetUniformLocation(ID, name.c_str()), vec.x, vec.y, vec.z);
+	}
+	void setVec4(std::string name, float x, float y, float z, float w) {
+		glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+	}
+	void setVec4(std::string name, Vec4 vec) {
+		glUniform4f(glGetUniformLocation(ID, name.c_str()), vec.x, vec.y, vec.z, vec.w);
 	}
 	void setMat4(std::string name, float* Mat) {
 		glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, false, Mat);

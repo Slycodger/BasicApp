@@ -12,6 +12,7 @@
 
 struct ObjectBase {
 	uint index = 0;
+	uint *texTarget = nullptr;
 	uint *VBO = nullptr;
 	uint *EBO = nullptr;
 	uint *triCount = nullptr;
@@ -22,7 +23,7 @@ struct Object : private ObjectBase {
 	Vec2 position;
 	Vec2 scale;
 	float rotation;
-	Vec3 color;
+	Vec4 color;
 
 
 	uint getIndex() {
@@ -37,8 +38,22 @@ struct Object : private ObjectBase {
 	uint getTriCount() {
 		return *triCount;
 	}
+	void setTexture(uint& texture) {
+		texTarget = &texture;
+	}
+	void removeTexture() {
+		texTarget = nullptr;
+	}
+	bool usesTexture() {
+		return texTarget == nullptr ? false : true;
+	}
+	uint getTexture() {
+		return *texTarget;
+	}
 
-	Object() : position(0), scale(1), rotation(0) {}
+
+
+	Object() : position(0), scale(1), rotation(0), color(1) {}
 };
 
 Object* createObj(std::string objName);

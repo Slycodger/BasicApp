@@ -105,5 +105,8 @@
     <ClInclude Include="scripts\text.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="scripts\globalScripts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

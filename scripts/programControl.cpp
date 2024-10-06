@@ -3,7 +3,7 @@
 #include "Windows.h"
 
 
-uint _Width = 720;
+uint _Width = 1280;
 uint _Height = 720;
 float _screenRatio = (float)_Width / _Height;
 double mousePosX = 0;
@@ -21,11 +21,11 @@ int main() {
 		return 0;
 	}
 	glfwMakeContextCurrent(mainWindow);
-	glfwSetWindowSizeCallback(mainWindow, windowScaled);
-	glfwSetCursorPosCallback(mainWindow, mouseMove);
-	glfwSetMouseButtonCallback(mainWindow, mouseClick);
-	glfwSetKeyCallback(mainWindow, keyPress);
-	glfwSetScrollCallback(mainWindow, mouseScroll);
+	glfwSetWindowSizeCallback(mainWindow, windowScaleCallback);
+	glfwSetCursorPosCallback(mainWindow, mouseMoveCallback);
+	glfwSetMouseButtonCallback(mainWindow, mouseClickCallback);
+	glfwSetKeyCallback(mainWindow, keyPressCallback);
+	glfwSetScrollCallback(mainWindow, mouseScrollCallback);
 
 	if (!gladLoadGL()) {
 		std::cout << "Failed to load GL\n";
@@ -36,6 +36,7 @@ int main() {
 
 
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	while (!glfwWindowShouldClose(mainWindow)) 
 	{
