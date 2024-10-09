@@ -1,6 +1,7 @@
 #pragma once
 #include "typeDefs.h"
 
+
 struct buttonState {
 	bool pressed = false;
 	bool held = false;
@@ -15,6 +16,7 @@ namespace giveKeyAction {
 	void latchSet();
 	void scrolledUp();
 	void scrolledDown();
+	void setNumlock(bool val);
 }
 
 namespace keyAction {
@@ -24,4 +26,5 @@ namespace keyAction {
 	bool scrolling();
 	bool scrollUp();
 	bool scrollDown();
+	bool numlock();
 }

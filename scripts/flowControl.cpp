@@ -7,8 +7,7 @@ void progEnd();
 Vec3 bgColor = Vec3(0);
 
 static uint VAO;
-static Shader basicShader;
-static Shader textureShader;
+static Shader shader;
 
 glm::mat4 transform(1);
 glm::mat4 view(1);
@@ -23,13 +22,14 @@ static uint objCount = 0;
 static uint myText = 0;
 
 void start() {
-	fontStart();
+	Text::start();
+	Objects::start();
 	for (uint i = 0; i < _MAX_OBJECTS; i++) {
 		globalObjects[i] = nullptr;
 	}
 
-	basicShader.createShader("./shaders/NTVertexShader.vert", "./shaders/NTFragmentShader.frag");
-	textureShader.createShader("./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
+	addShader("noTextureShader", "./shaders/NTVertexShader.vert", "./shaders/NTFragmentShader.frag");
+	addShader("textureShader", "./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
 
 	projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
 
@@ -40,7 +40,7 @@ void update() {
 
 	progMain();
 
-	glClearColor(*bgColor.r, *bgColor.g, *bgColor.b, 1);
+	glClearColor(bgColor.x, bgColor.y, bgColor.z, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	drawAllObjs();
@@ -54,7 +54,10 @@ void end() {
 	progEnd();
 	deleteAll();
 	deleteObjMapping();
-	fontEnd();
+
+	Text::end();
+	Objects::end();
+	Shaders::end();
 }
 
 
@@ -82,29 +85,31 @@ void drawAllObjs() {
 		Object* obj = ((Object*)globalObjects[i]);
 
 		updateObjScripts(obj);
+		if (obj->parent == nullptr)
+			updateObjChildren(obj);
 
 		transform = glm::mat4(1);
-		transform = glm::translate(transform, glm::vec3(obj->position.toGLM(), 1));
-		transform = glm::rotate(transform, (float)degToRad * obj->rotation, glm::vec3(0, 0, 1));
-		transform = glm::scale(transform, glm::vec3(obj->scale.toGLM(), 1));
+		transform = glm::translate(transform, obj->transform.position.toGLM());
+		transform = glm::rotate(transform, (float)degToRad * obj->transform.rotation.z, glm::vec3(0, 0, 1));
+		transform = glm::scale(transform, obj->transform.scale.toGLM());
 		if (obj->usesTexture()) {
 			uint texTarget = obj->getTexture();
-			textureShader.use();
-			textureShader.setMat4("transform", glm::value_ptr(transform));
-			textureShader.setMat4("view", glm::value_ptr(view));
-			textureShader.setMat4("projection", glm::value_ptr(projection));
-			textureShader.setVec2("screenSize", _Width, _Height);
-			textureShader.setVec4("color", obj->color);
-			textureShader.setInt("texture", 0);
+			shader.use(getShader("textureShader"));
+			shader.setMat4("transform", glm::value_ptr(transform));
+			shader.setMat4("view", glm::value_ptr(view));
+			shader.setMat4("projection", glm::value_ptr(projection));
+			shader.setVec2("screenSize", _Width, _Height);
+			shader.setVec4("color", obj->color);
+			shader.setInt("texture", 0);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texTarget);
 		}
 		else {
-			basicShader.use();
-			basicShader.setMat4("transform", glm::value_ptr(transform));
-			basicShader.setMat4("view", glm::value_ptr(view));
-			basicShader.setMat4("projection", glm::value_ptr(projection));
-			basicShader.setVec4("color", obj->color);
+			shader.use(getShader("noTextureShader"));
+			shader.setMat4("transform", glm::value_ptr(transform));
+			shader.setMat4("view", glm::value_ptr(view));
+			shader.setMat4("projection", glm::value_ptr(projection));
+			shader.setVec4("color", obj->color);
 		}
 
 		glBindVertexArray(VAO);
@@ -189,6 +194,7 @@ void keyPressCallback(GLFWwindow* window, int button, int scancode, int action, 
 		giveKeyAction::keyPressed(button);
 	else if (action == GLFW_RELEASE)
 		giveKeyAction::keyReleased(button);
+	giveKeyAction::setNumlock(mods & GLFW_MOD_NUM_LOCK);
 }
 void mouseScrollCallback(GLFWwindow* window, double xoff, double yoff) {
 	if (yoff > 0)
@@ -248,4 +254,13 @@ void clearObjScripts(Object*& obj) {
 		delete(((ObjectBase*)obj)->scripts[i]);
 	}
 	((ObjectBase*)obj)->scripts.clear();
+}
+
+void updateObjChildren(Object*& obj) {
+	if (obj->children.size() == 0)
+		return;
+	for (Object* child : obj->children) {
+		child->setToRelative();
+		updateObjChildren(child);
+	}
 }

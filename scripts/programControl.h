@@ -5,7 +5,7 @@
 #include <iostream>
 #include "MathConstants.h"
 #include "Shapes.h"
-#include "typeDefs.h"
-#include "flowControl.h"
-#include "globalVars.h"
+#include "TypeDefs.h"
+#include "FlowControl.h"
+#include "GlobalVars.h"
 #endif

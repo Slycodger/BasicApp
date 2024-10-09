@@ -5,13 +5,22 @@
 #include <sstream>
 #include <iostream>
 #include "Vector.h"
+#include <map>
 
 struct Shader {
-	uint ID;
 
-	void use() {
+	void active() {
 		glUseProgram(ID);
 	}
+	void use(unsigned int shader) {
+		ID = shader;
+		glUseProgram(ID);
+	}
+	void remove() {
+		glDeleteProgram(ID);
+		ID = 0;
+	}
+
 	void stop() {
 		glUseProgram(0);
 	}
@@ -45,11 +54,10 @@ struct Shader {
 	void setMat4(std::string name, float* Mat) {
 		glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, false, Mat);
 	}
-	void remove() {
-		glDeleteProgram(ID);
-	}
 
-	void createShader(std::string vertexLoc, std::string fragmentLoc) {
+	static uint createShader(std::string vertexLoc, std::string fragmentLoc) {
+
+		uint shader = 0;
 
 		std::fstream vertexFile;
 		std::fstream fragmentFile;
@@ -107,18 +115,30 @@ struct Shader {
 			std::cout << "Failed to compile fragment shader\n INFO : \n" << infoLog;
 		}
 
-		ID = glCreateProgram();
-		glAttachShader(ID, vertexShader);
-		glAttachShader(ID, fragmentShader);
-		glLinkProgram(ID);
+		shader = glCreateProgram();
+		glAttachShader(shader, vertexShader);
+		glAttachShader(shader, fragmentShader);
+		glLinkProgram(shader);
 
-		glGetShaderiv(ID, GL_LINK_STATUS, &success);
+		glGetShaderiv(shader, GL_LINK_STATUS, &success);
 		if (!success) {
-			glGetShaderInfoLog(ID, 512, nullptr, infoLog);
+			glGetShaderInfoLog(shader, 512, nullptr, infoLog);
 			std::cout << "Failed to link program\n INFO : \n" << infoLog;
 		}
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+
+		return shader;
 	}
+
+	private :
+		uint ID;
 };
+
+bool addShader(std::string name, std::string vertLoc, std::string fragLoc);
+uint getShader(std::string name);
+
+namespace Shaders {
+	void end();
+}

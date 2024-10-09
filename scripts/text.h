@@ -11,6 +11,14 @@
 #include "Shapes.h"
 #endif
 
+#if defined(_TEXT) || defined(_FLOW_CONTROL)
+namespace Text {
+	void start();
+	void end();
+}
+#endif
+
+
 #include "typeDefs.h"
 #include "Vector.h"
 #include <string>
@@ -32,6 +40,4 @@ struct cChar {
 
 bool loadFont(std::string font, std::string name);
 cChar getChar(std::string name, char character);
-void createTextTexture(uint& texture, float fontSize, float lineSize, int sharpness, float width, float height, uint mode, std::string font, std::string text);
-void fontStart();
-void fontEnd();
+void createTextTexture(uint& texture, float fontSize, float lineSize, float width, float height, uint mode, std::string font, std::string text);

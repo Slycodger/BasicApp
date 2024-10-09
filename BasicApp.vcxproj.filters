@@ -23,22 +23,25 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad\src\glad.c" />
-    <ClCompile Include="scripts\flowControl.cpp">
+    <ClCompile Include="scripts\FlowControl.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
-    <ClCompile Include="scripts\input.cpp">
+    <ClCompile Include="scripts\Input.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
-    <ClCompile Include="scripts\programControl.cpp">
+    <ClCompile Include="scripts\ProgramControl.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
     <ClCompile Include="scripts\Objects.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
-    <ClCompile Include="scripts\main.cpp">
+    <ClCompile Include="scripts\Main.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
-    <ClCompile Include="scripts\text.cpp">
+    <ClCompile Include="scripts\Text.cpp">
+      <Filter>Script Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scripts\IntializeShader.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,13 +66,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="scripts\flowControl.h">
+    <ClInclude Include="scripts\FlowControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scripts\globalVars.h">
+    <ClInclude Include="scripts\GlobalVars.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scripts\input.h">
+    <ClInclude Include="scripts\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="scripts\IntializeShader.h">
@@ -81,13 +84,13 @@
     <ClInclude Include="scripts\OpenGL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scripts\programControl.h">
+    <ClInclude Include="scripts\ProgramControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="scripts\Shapes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scripts\typeDefs.h">
+    <ClInclude Include="scripts\TypeDefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="scripts\Objects.h">
@@ -99,13 +102,13 @@
     <ClInclude Include="scripts\Constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scripts\objScripts.h">
+    <ClInclude Include="scripts\ObjScripts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scripts\text.h">
+    <ClInclude Include="scripts\Text.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scripts\globalScripts.h">
+    <ClInclude Include="scripts\GlobalScripts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

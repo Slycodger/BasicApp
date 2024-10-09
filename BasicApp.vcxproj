@@ -151,12 +151,13 @@ xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glad\src\glad.c" />
-    <ClCompile Include="scripts\flowControl.cpp" />
-    <ClCompile Include="scripts\input.cpp" />
-    <ClCompile Include="scripts\main.cpp" />
+    <ClCompile Include="scripts\FlowControl.cpp" />
+    <ClCompile Include="scripts\Input.cpp" />
+    <ClCompile Include="scripts\IntializeShader.cpp" />
+    <ClCompile Include="scripts\Main.cpp" />
     <ClCompile Include="scripts\Objects.cpp" />
-    <ClCompile Include="scripts\programControl.cpp" />
-    <ClCompile Include="scripts\text.cpp" />
+    <ClCompile Include="scripts\ProgramControl.cpp" />
+    <ClCompile Include="scripts\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\NTFragmentShader.frag" />
@@ -167,20 +168,20 @@ xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s</Command>
     <None Include="shaders\TVertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="scripts\globalScripts.h" />
-    <ClInclude Include="scripts\objScripts.h" />
+    <ClInclude Include="scripts\GlobalScripts.h" />
+    <ClInclude Include="scripts\ObjScripts.h" />
     <ClInclude Include="scripts\Constants.h" />
     <ClInclude Include="scripts\Objects.h" />
-    <ClInclude Include="scripts\flowControl.h" />
-    <ClInclude Include="scripts\globalVars.h" />
-    <ClInclude Include="scripts\input.h" />
+    <ClInclude Include="scripts\FlowControl.h" />
+    <ClInclude Include="scripts\GlobalVars.h" />
+    <ClInclude Include="scripts\Input.h" />
     <ClInclude Include="scripts\IntializeShader.h" />
     <ClInclude Include="scripts\MathConstants.h" />
     <ClInclude Include="scripts\OpenGL.h" />
-    <ClInclude Include="scripts\programControl.h" />
+    <ClInclude Include="scripts\ProgramControl.h" />
     <ClInclude Include="scripts\Shapes.h" />
-    <ClInclude Include="scripts\text.h" />
-    <ClInclude Include="scripts\typeDefs.h" />
+    <ClInclude Include="scripts\Text.h" />
+    <ClInclude Include="scripts\TypeDefs.h" />
     <ClInclude Include="scripts\Vector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

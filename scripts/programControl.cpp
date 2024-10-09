@@ -1,5 +1,5 @@
 #define _PROGRAM_CONTROL
-#include "programControl.h"
+#include "ProgramControl.h"
 #include "Windows.h"
 
 
@@ -27,13 +27,14 @@ int main() {
 	glfwSetKeyCallback(mainWindow, keyPressCallback);
 	glfwSetScrollCallback(mainWindow, mouseScrollCallback);
 
+	glfwSetInputMode(mainWindow, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
+
 	if (!gladLoadGL()) {
 		std::cout << "Failed to load GL\n";
 		return 0;
 	}
 
 	start();
-
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -16,36 +16,15 @@ static constexpr uint charSizeHuge = 512;
 static uint FBO = 0;
 static uint VAO, VBO, EBO;
 
-Shader textShader;
+Shader shader;
 
-//Create buffers that will be used for character rendering
-void fontStart() {
-	glGenFramebuffers(1, &FBO);
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(squareVertices), squareVertices, GL_STREAM_DRAW);
-	
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(squareIndices), squareIndices, GL_STREAM_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	//And shader
-	textShader.createShader("./shaders/TextVertexShader.vert", "./shaders/TextFragmentShader.frag");
-}
-
-//Load a font, hidden function used internally so fonts can be used if loaded once anywhere
+/// <summary>
+/// Load a font into a map with some size
+/// </summary>
+/// <param name="map">: The map that fonts will load into</param>
+/// <param name="face">: The FT_Face that contains the font you want to use</param>
+/// <param name="size">: The pixel size of the font</param>
+/// <returns>True/False on if it is able to load all the characters</returns>
 bool loadSizeMap(std::map<char, cChar> &map, FT_Face& face, uint size) {
 	//Set to whatever size
 	FT_Set_Pixel_Sizes(face, 0, size);
@@ -72,8 +51,12 @@ bool loadSizeMap(std::map<char, cChar> &map, FT_Face& face, uint size) {
 	return true;
 }
 
-//Shown loading font function
-//Also generates the 5 different sizes of a font
+/// <summary>
+/// Load a font with the default sizes into a global fonts area
+/// </summary>
+/// <param name="font">: The font to be loaded</param>
+/// <param name="name">: The name that you will use to access the font</param>
+/// <returns>True/False on if the font is able to be loaded</returns>
 bool loadFont(std::string font, std::string name) {
 	programFonts.emplace(font, std::map<char, cChar>());
 
@@ -104,12 +87,24 @@ bool loadFont(std::string font, std::string name) {
 	return true;
 }
 
-//Gets a character from some font
+/// <summary>
+/// Get the data of some fonts character
+/// </summary>
+/// <param name="name">: Name of the font</param>
+/// <param name="character">: The character you want</param>
+/// <returns>A struct that contains all the information for the character and texture</returns>
 cChar getChar(std::string name, char character) {
 	return programFonts[name][character];
 }
 
-//Draws text at position with size to current framebuffer
+/// <summary>
+/// Draw text from some font to screen with some size and starting position
+/// </summary>
+/// <param name="font">: The font to be used</param>
+/// <param name="text">: Text that will be drawn</param>
+/// <param name="fontSize">: Font size</param>
+/// <param name="x">: Starting 'x' position</param>
+/// <param name="yT">: Starting 'y' position</param>
 void renderTextBuffer(std::string font, std::string text, float fontSize, float x, float yT) {
 	cChar curChar;
 	float w = 0;
@@ -147,18 +142,29 @@ void renderTextBuffer(std::string font, std::string text, float fontSize, float 
 	}
 }
 
-//Create a text texture to be used
-void createTextTexture(uint& texture, float fontSize, float lineSize, int sharpness, float width, float height, uint mode, std::string font, std::string text) {
-	uint screenX = width * _Height * sharpness;
-	uint screenY = height * _Height * sharpness;
+/// <summary>
+/// Creates a text texture to be used by some object
+/// Supports line breaks
+/// </summary>
+/// <param name="texture">: The output texture</param>
+/// <param name="fontSize">: A relative font size to the object</param>
+/// <param name="lineSize">: A relative line size to the object</param>
+/// <param name="width">: Object width</param>
+/// <param name="height">: Object height</param>
+/// <param name="mode">: The text position mode</param>
+/// <param name="font">: Font you want</param>
+/// <param name="text">: Text that will be shown on texture</param>
+/// <returns>Text drawn to 'texture'</returns>
+void createTextTexture(uint& texture, float fontSize, float lineSize, float width, float height, uint mode, std::string font, std::string text) {
+	uint screenX = width * _Height;
+	uint screenY = height * _Height;
 	float ratio = width / height;
 	glm::mat4 ortho = glm::ortho(-ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f);
 	cChar curChar;
 
-
-	textShader.use();
-	textShader.setInt("texTarget", 0);
-	textShader.setMat4("projection", glm::value_ptr(ortho));
+	shader.active();
+	shader.setInt("texTarget", 0);
+	shader.setMat4("projection", glm::value_ptr(ortho));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glDeleteTextures(1, &texture);
@@ -332,13 +338,44 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, int sharpn
 	glViewport(0, 0, _Width, _Height);
 }
 
-//Deletes the fonts
-void fontEnd() {
-	for (auto& map : programFonts) {
-		for (int c = fChar; c < lChar; c++) {
-			glDeleteTextures(1, &(map.second)[c].texTarget);
-			map.second.clear();
-		}
+
+
+namespace Text {
+	void start() {
+		glGenFramebuffers(1, &FBO);
+		glGenVertexArrays(1, &VAO);
+		glBindVertexArray(VAO);
+
+		glGenBuffers(1, &VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(squareVertices), squareVertices, GL_STREAM_DRAW);
+
+		glGenBuffers(1, &EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(squareIndices), squareIndices, GL_STREAM_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+		addShader("textShader", "./shaders/TextVertexShader.vert", "./shaders/TextFragmentShader.frag");
+		shader.use(getShader("textShader"));
 	}
-	programFonts.clear();
+
+	void end() {
+		for (auto& map : programFonts) {
+			for (int c = fChar; c < lChar; c++) {
+				glDeleteTextures(1, &(map.second)[c].texTarget);
+				map.second.clear();
+			}
+		}
+		programFonts.clear();
+	}
+
 }

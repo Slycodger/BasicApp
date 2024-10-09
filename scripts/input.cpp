@@ -2,6 +2,8 @@
 
 constexpr uint keyCount = 349;
 
+static bool numLock = false;
+
 buttonState allButtons[keyCount];
 bool scrollingUp = false;
 bool scrollingDown = false;
@@ -33,6 +35,9 @@ namespace giveKeyAction {
 		scrollingUp = false;
 		scrollingDown = true;
 	}
+	void setNumlock(bool val) {
+		numLock = val;
+	}
 }
 
 namespace keyAction {
@@ -53,5 +58,8 @@ namespace keyAction {
 	}
 	bool scrollDown() {
 		return scrollingDown;
+	}
+	bool numlock() {
+		return numLock;
 	}
 }

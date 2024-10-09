@@ -5,6 +5,26 @@ bool addGlobalObj(ObjectBase*&);
 
 static std::map<std::string, std::tuple<uint*, uint*, uint*>> objTypes;
 
+unsigned int squareVBO, squareEBO, squareTriCount;
+
+namespace Objects {
+	//Creates default objects
+	void start() {
+		createBufferObj(squareVBO, squareEBO, squareVertices, squareIndices, sizeof(squareVertices), sizeof(squareIndices));
+		squareTriCount = 6;
+		loadBufferObj("square", &squareVBO, &squareEBO, &squareTriCount);
+
+	}
+
+	//Deletes at the end
+	void end() {
+		unloadBufferObj("square");
+		glDeleteBuffers(1, &squareVBO);
+		glDeleteBuffers(1, &squareEBO);
+	}
+}
+
+
 //Creates the buffers for an object
 void createBufferObj(uint& VBO, uint& EBO, const float vertices[], const uint indices[], const size_t vertSize, const size_t indiceSize) {
 	glCreateBuffers(1, &VBO);
@@ -37,9 +57,9 @@ void deleteObjMapping() {
 //Returns a created object
 Object* createObj(std::string objName) {
 	try {
-		auto objData = objTypes.at(objName);
+		auto& objData = objTypes.at(objName);
 
-		Object* obj = new Object;
+		Object* obj = new Object();
 		ObjectBase* objBase = (ObjectBase*)obj;
 
 		objBase->VBO = std::get<0>(objData);
@@ -51,10 +71,6 @@ Object* createObj(std::string objName) {
 			delete(objBase);
 			return nullptr;
 		}
-
-		obj->position = Vec2(0);
-		obj->scale = Vec2(1);
-		obj->rotation = 0;
 
 
 		return obj;
