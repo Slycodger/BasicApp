@@ -26,53 +26,44 @@ void progStart() {
 		std::cout << "Failed to load font\n";
 	}
 
-	obj = createObj("square");
-	obj->transform.scale = Vec3(0.4, 0.3, 1);
-	obj->transform.position = Vec3(_screenRatio - 0.4, -0.7, 0);
-
-
-	textScr = buttonScr->textScr;
-	textScr->text = "button";
-	textScr->font = "CascadiaCode_SMALL";
-	textScr->fontSize = 0.6;
-	textScr->lineSize = 1;
-	textScr->mode = TEXT_LEFT_RENDER;
-	textScr->fontColor = Vec4(1, 1, 0, 1);
-
-	addObjScript(obj, (void*)buttonScr);
-
 	square1 = createObj("square");
 	square2 = createObj("square");
 
-	square1->transform.scale = { 0.2, 0.2, 1 };
+	square1->transform.scale = { 0.2, 0.2 };
 	square1->transform.position.x = -0.7;
+	square1->depth = -0.1;
 
-	square2->transform.scale = { 0.1, 0.1, 1 };
+	square2->transform.scale = { 0.1, 0.1 };
+	square2->depth = 0.02f;
 	square2->setParent(square1);
 
 	square1->color = { 0, 1, 0, 1 };
 	square2->color = { 1, 0, 0, 1 };
+
+	obj = createObj("square");
+	obj->transform.scale = Vec3(0.4, 0.3, 1);
+	obj->transform.position = Vec3(_screenRatio - 0.4, -0.7, 0);
+	obj->color = Vec4{ 1, 1, 1, 0.3 };
+
+
+	textScr = buttonScr->textScr;
+	textScr->text = "Button";
+	textScr->font = "CascadiaCode_SMALL";
+	textScr->fontSize = 0.5;
+	textScr->lineSize = 0.55;
+	textScr->mode = TEXT_CENTER_RENDER;
+	textScr->fontColor = Vec4(1, 1, 0, 1);
+
+	{
+		std::string name = typeid(buttonScr).name();
+		addObjScript(obj, (void*)buttonScr, name.substr(name.find(' ' + 1)));
+	}
 
 }
 
 bool shape = false;
 
 void progMain() {
-	if (keyAction::scrollUp()) {
-		textScr->fontSize += 0.05f;
-		textScr->lineSize += 0.05f;
-	}
-	if (keyAction::scrollDown()) {
-		textScr->fontSize -= 0.05f;
-		textScr->lineSize -= 0.05f;
-	}
-	if (keyAction::keyPressed(GLFW_KEY_SPACE)) {
-		if (textScr->mode == TEXT_LEFT_RENDER)
-			textScr->mode = TEXT_CENTER_RENDER;
-		else
-			textScr->mode = TEXT_LEFT_RENDER;
-	}
-
 	if (keyAction::keyPressed(GLFW_KEY_LEFT))
 		square1->transform.position.x -= 0.05f;
 	if (keyAction::keyPressed(GLFW_KEY_RIGHT))
@@ -86,9 +77,9 @@ void progMain() {
 	if (keyAction::keyPressed(GLFW_KEY_PAGE_DOWN))
 		square1->transform.scale -= 0.05f;
 	if (keyAction::keyPressed(GLFW_KEY_KP_8) && keyAction::numlock())
-		square1->transform.rotation.z += 5;
+		square1->transform.rotation += 5;
 	if (keyAction::keyPressed(GLFW_KEY_KP_2) && keyAction::numlock())
-		square1->transform.rotation.z -= 5;
+		square1->transform.rotation -= 5;
 
 
 }

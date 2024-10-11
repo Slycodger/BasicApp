@@ -131,33 +131,63 @@ struct Vec2 {
 		return glm::vec2(x, y);
 	}
 
-	Vec2& operator =(const Vec2& val) {
-		if (this == &val)
-			return *this;
-		this->x = val.x;
-		this->y = val.y;
+	float magnitude() {
+		return sqrt(pow(x, 2) + pow(y, 2));
+	}
 
+	Vec2& operator -=(const float val) {
+		this->x -= val;
+		this->y -= val;
 		return *this;
 	}
-	Vec2& operator +=(const Vec2 val) {
+	Vec2& operator -=(const Vec2& val) {
+		this->x -= val.x;
+		this->y -= val.y;
+		return *this;
+	}
+	Vec2& operator +=(const float val) {
+		this->x += val;
+		this->y += val;
+		return *this;
+	}
+	Vec2& operator +=(const Vec2& val) {
 		this->x += val.x;
 		this->y += val.y;
 		return *this;
 	}
-	Vec2& operator *=(const Vec2 val) {
+	Vec2& operator *=(const Vec2& val) {
 		this->x *= val.x;
 		this->y *= val.y;
 		return *this;
 	}
-	Vec2 operator *(const Vec2 val) {
+	Vec2& operator =(const Vec2& val) {
+		this->x = val.x;
+		this->y = val.y;
+		return *this;
+	}
+	Vec2 operator *(const Vec2& val) {
 		Vec2 temp = *this;
-		temp *= val;
+		temp.x *= val.x;
+		temp.y *= val.y;
 		return temp;
 	}
-	bool operator != (const Vec2 val) {
-		if (val.x == this->x && val.y == this->y)
-			return false;
-		return true;
+	Vec2 operator /(const Vec2& val) {
+		Vec2 temp = *this;
+		temp.x /= val.x;
+		temp.y /= val.y;
+		return temp;
+	}
+	Vec2 operator -(const Vec2& val) {
+		Vec2 temp = *this;
+		temp.x -= val.x;
+		temp.y -= val.y;
+		return temp;
+	}
+	Vec2 operator +(const Vec2& val) {
+		Vec2 temp = *this;
+		temp.x += val.x;
+		temp.y += val.y;
+		return temp;
 	}
 };
 

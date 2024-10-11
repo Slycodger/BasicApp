@@ -23,8 +23,9 @@ namespace Text {
 #include "Vector.h"
 #include <string>
 
-#define TEXT_LEFT_RENDER 0
-#define TEXT_CENTER_RENDER 1
+#define TEXT_LINE_LEFT_RENDER 0
+#define TEXT_LINE_CENTER_RENDER 1
+#define TEXT_CENTER_RENDER 2
 
 
 struct cChar {
@@ -40,4 +41,4 @@ struct cChar {
 
 bool loadFont(std::string font, std::string name);
 cChar getChar(std::string name, char character);
-void createTextTexture(uint& texture, float fontSize, float lineSize, float width, float height, uint mode, std::string font, std::string text);
+void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size, float yStart, float margin, uint mode, std::string font, std::string text);

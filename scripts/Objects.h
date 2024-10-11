@@ -27,9 +27,9 @@ struct ObjectBase {
 };
 
 struct Transform {
-	Vec3 position;
-	Vec3 scale;
-	Vec3 rotation;
+	Vec2 position;
+	Vec2 scale;
+	float rotation;
 
 	Transform() : position(0), scale(1), rotation(0) {}
 };
@@ -37,9 +37,11 @@ struct Transform {
 struct Object : private ObjectBase { 
 	Transform transform;
 	Transform relativeTransform;
-	Object* parent;
 	std::set<Object*> children;
+	Object* parent;
 	Vec4 color;
+	float depth;
+	float relativeDepth;
 
 	//--------------------------getter functions
 
@@ -82,17 +84,19 @@ struct Object : private ObjectBase {
 		relativeTransform.position = (transform.position - parent->transform.position) / parent->transform.scale;
 		relativeTransform.scale = transform.scale / parent->transform.scale;
 		relativeTransform.rotation = transform.rotation - parent->transform.rotation;
+		relativeDepth = depth - parent->depth;
 	}
 	void setToRelative() {
 		if (parent == nullptr)
 			return;
-		Vec3 angle = parent->transform.rotation + relativeTransform.rotation;
-		transform.position.x = cos(angle.z * degToRad);
-		transform.position.y = sin(angle.z * degToRad);
+		float angle = parent->transform.rotation + relativeTransform.rotation;
+		transform.position.x = cos(angle * degToRad);
+		transform.position.y = sin(angle * degToRad);
 		transform.position *= (parent->transform.scale * relativeTransform.position).magnitude();
 		transform.scale = relativeTransform.scale * parent->transform.scale;
 		transform.position += parent->transform.position;
 		transform.rotation = angle;
+		depth = relativeDepth + parent->depth;
 	}
 	void removeParent() {
 		parent->children.erase(this);
@@ -109,7 +113,7 @@ struct Object : private ObjectBase {
 
 	//-------------------Constructor
 
-	Object() : transform(), relativeTransform(), parent(nullptr), color(1) {}
+	Object() : transform(), relativeTransform(), parent(nullptr), color(1), depth(0), relativeDepth(0) {}
 };
 
 Object* createObj(std::string objName);

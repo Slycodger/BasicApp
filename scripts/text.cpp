@@ -18,6 +18,7 @@ static uint VAO, VBO, EBO;
 
 Shader shader;
 
+
 /// <summary>
 /// Load a font into a map with some size
 /// </summary>
@@ -50,6 +51,7 @@ bool loadSizeMap(std::map<char, cChar> &map, FT_Face& face, uint size) {
 	}
 	return true;
 }
+
 
 /// <summary>
 /// Load a font with the default sizes into a global fonts area
@@ -87,6 +89,7 @@ bool loadFont(std::string font, std::string name) {
 	return true;
 }
 
+
 /// <summary>
 /// Get the data of some fonts character
 /// </summary>
@@ -96,6 +99,7 @@ bool loadFont(std::string font, std::string name) {
 cChar getChar(std::string name, char character) {
 	return programFonts[name][character];
 }
+
 
 /// <summary>
 /// Draw text from some font to screen with some size and starting position
@@ -142,25 +146,55 @@ void renderTextBuffer(std::string font, std::string text, float fontSize, float 
 	}
 }
 
+
 /// <summary>
 /// Creates a text texture to be used by some object
-/// Supports line breaks
+/// <para>Supports line breaks</para>
 /// </summary>
 /// <param name="texture">: The output texture</param>
 /// <param name="fontSize">: A relative font size to the object</param>
 /// <param name="lineSize">: A relative line size to the object</param>
-/// <param name="width">: Object width</param>
-/// <param name="height">: Object height</param>
-/// <param name="mode">: The text position mode</param>
+/// <param name="size">: Object size</param>
+/// <param name="yStart">: Starting y position</param>
+/// <param name="margin">: Text margin</param>
 /// <param name="font">: Font you want</param>
 /// <param name="text">: Text that will be shown on texture</param>
 /// <returns>Text drawn to 'texture'</returns>
-void createTextTexture(uint& texture, float fontSize, float lineSize, float width, float height, uint mode, std::string font, std::string text) {
-	uint screenX = width * _Height;
-	uint screenY = height * _Height;
-	float ratio = width / height;
-	glm::mat4 ortho = glm::ortho(-ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f);
+void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size, float yStart, float margin, uint mode, std::string font, std::string text) {
+	uint screenX = size.x * _Height;
+	uint screenY = size.y * _Height;
 	cChar curChar;
+	float ratio = size.x / size.y;
+
+	//Draw text centered both vertically and horizontally
+	//Does a recurse function move to make things easier
+	if (mode == TEXT_CENTER_RENDER) {
+		Vec2 Pos = { -ratio + margin, yStart - lineSize };
+		for (int i = 0; i < text.length(); i++) {
+			char c = text[i];
+			if (c == '\n')
+			{
+				Pos.x = -ratio + margin;
+				Pos.y -= lineSize;
+				continue;
+			}
+
+			curChar = programFonts[font][c];
+
+			Pos.x += (curChar.advance + curChar.bearing.x) * fontSize;
+			if (Pos.x > ratio + margin)
+			{
+				Pos.x = -ratio + margin;
+				Pos.y -= lineSize;
+			}
+		}
+		createTextTexture(texture, fontSize, lineSize, size, (yStart - Pos.y) / 2 + (fontSize / 2), margin, TEXT_LINE_CENTER_RENDER, font, text);
+		return;
+	}
+
+
+
+	glm::mat4 ortho = glm::ortho(-ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	shader.active();
 	shader.setInt("texTarget", 0);
@@ -180,9 +214,9 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, float widt
 
 
 	//Draws text on the left hand side of the text
-	if (mode == TEXT_LEFT_RENDER)
+	if (mode == TEXT_LINE_LEFT_RENDER)
 	{
-		Vec2 realPos = { -ratio, 1 - fontSize };
+		Vec2 realPos = { -ratio + margin, yStart - lineSize };
 		Vec2 fakePos = realPos;
 		bool oneWord = true;
 		std::string word;
@@ -195,7 +229,7 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, float widt
 					word.clear();
 				}
 
-				fakePos.x = -width;
+				fakePos.x = -ratio + margin;
 				fakePos.y -= lineSize;
 				realPos = fakePos;
 			}
@@ -216,13 +250,13 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, float widt
 			if (c != ' ')
 				word += c;
 
-			if (fakePos.x > ratio) {
+			if (fakePos.x > ratio + margin) {
 				if (oneWord)
 				{
 					if (word.length() == 1) {
 						renderTextBuffer(font, word, fontSize, realPos.x, realPos.y);
 						word.clear();
-						fakePos.x = -width;
+						fakePos.x = -ratio + margin;
 						fakePos.y -= lineSize;
 						realPos = fakePos;
 						continue;
@@ -232,7 +266,7 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, float widt
 						renderTextBuffer(font, word, fontSize, realPos.x, realPos.y);
 						word.clear();
 					}
-					fakePos.x = -width;
+					fakePos.x = -ratio;
 					fakePos.y -= lineSize;
 					realPos = fakePos;
 					i--;
@@ -242,7 +276,7 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, float widt
 					i -= word.length();
 					word.clear();
 				}
-				fakePos.x = -width;
+				fakePos.x = -ratio;
 				fakePos.y -= lineSize;
 				realPos = fakePos;
 				oneWord = true;
@@ -256,10 +290,10 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, float widt
 
 	//Draws text centered within the texture
 	//Best with text that includes line breaks often since it will act the same as left drawing if the line fills
-	if (mode == TEXT_CENTER_RENDER)
+	if (mode == TEXT_LINE_CENTER_RENDER)
 	{
 		float wordWidth = 0;
-		Vec2 pos = { 0, 1 - fontSize };
+		Vec2 pos = { 0, yStart - fontSize };
 		std::string sentence;
 		std::string word;
 		bool oneWord = true;
@@ -293,7 +327,7 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, float widt
 				oneWord = false;
 			}
 			
-			if (pos.x > 2 * ratio) {
+			if (pos.x > 2 * (ratio + margin)) {
 				if (!oneWord) {
 					sentence.erase(sentence.end() - word.length(), sentence.end());
 					i -= word.length();
@@ -337,7 +371,6 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, float widt
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, _Width, _Height);
 }
-
 
 
 namespace Text {

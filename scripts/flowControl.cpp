@@ -41,7 +41,7 @@ void update() {
 	progMain();
 
 	glClearColor(bgColor.x, bgColor.y, bgColor.z, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawAllObjs();
 
@@ -89,9 +89,9 @@ void drawAllObjs() {
 			updateObjChildren(obj);
 
 		transform = glm::mat4(1);
-		transform = glm::translate(transform, obj->transform.position.toGLM());
-		transform = glm::rotate(transform, (float)degToRad * obj->transform.rotation.z, glm::vec3(0, 0, 1));
-		transform = glm::scale(transform, obj->transform.scale.toGLM());
+		transform = glm::translate(transform, glm::vec3(obj->transform.position.toGLM(), obj->depth));
+		transform = glm::rotate(transform, (float)degToRad * obj->transform.rotation, glm::vec3(0, 0, 1));
+		transform = glm::scale(transform, glm::vec3(obj->transform.scale.toGLM(), 1));
 		if (obj->usesTexture()) {
 			uint texTarget = obj->getTexture();
 			shader.use(getShader("textureShader"));
@@ -213,22 +213,30 @@ void mouseClickCallback(GLFWwindow* window, int button, int action, int mods) {
 
 //--------------------FOR-OBJECTS
 
-//Adds a script to object
-void addObjScript(Object*& obj, void* script) {
+/// <summary>
+/// 
+/// </summary>
+void addObjScript(Object*& obj, void* script, std::string scrName) {
 	((ObjectBase*)obj)->scripts.push_back(script);
 	scriptBase* realScr = (scriptBase*)script;
-	realScr->thisObj = (Object*)obj;
+	realScr->thisObj = obj;
+	realScr->name = scrName;
 	realScr->start();
 }
 
-//Removes a specific script from object
+/// <summary>
+/// Remove an object script at a specific index
+/// </summary>
 void removeObjScript(Object*& obj, unsigned int index) {
 	((scriptBase*)((ObjectBase*)obj)->scripts[index])->end();
 	delete(((ObjectBase*)obj)->scripts[index]);
 	((ObjectBase*)obj)->scripts.erase(((ObjectBase*)obj)->scripts.begin() + index);
 }
 
-//Returns the index of a script in the list on an object
+/// <summary>
+/// Get the index of a specific script on an object
+/// </summary>
+/// <returns>An unsigned int with the index</returns>
 unsigned int getObjScriptIndex(Object*& obj, std::string name) {
 	for (uint i = 0; i < ((ObjectBase*)obj)->scripts.size(); i++) {
 		scriptBase* realScr = (scriptBase*)((ObjectBase*)obj)->scripts[i];
@@ -239,7 +247,20 @@ unsigned int getObjScriptIndex(Object*& obj, std::string name) {
 	return UINT_MAX;
 }
 
-//Calls the update function on all scripts for an object
+/// <summary>
+/// Get an object script from name
+/// </summary>
+/// <returns>A void* to the script, you have to cast it yourself</returns>
+void* getObjScript(Object*& obj, std::string name) {
+	uint index = getObjScriptIndex(obj, name);
+	if (index >= UINT_MAX)
+		return nullptr;
+	return ((ObjectBase*)obj)->scripts[index];
+}
+
+/// <summary>
+/// Updates all of an objects scripts
+/// </summary>
 void updateObjScripts(Object*& obj) {
 	for (uint i = 0; i < ((ObjectBase*)obj)->scripts.size(); i++) {
 		scriptBase* realScr = (scriptBase*)((ObjectBase*)obj)->scripts[i];
@@ -247,7 +268,9 @@ void updateObjScripts(Object*& obj) {
 	}
 }
 
-//Clears all scripts from an object
+/// <summary>
+/// Deletes all the scripts from an object
+/// </summary>
 void clearObjScripts(Object*& obj) {
 	for (uint i = 0; i < ((ObjectBase*)obj)->scripts.size(); i++) {
 		((scriptBase*)((ObjectBase*)obj)->scripts[i])->end();

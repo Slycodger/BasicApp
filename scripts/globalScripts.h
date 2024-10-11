@@ -11,47 +11,32 @@ struct TextBox : scriptBase {
 	std::string font;
 	float fontSize;
 	float lineSize;
+	float yStart;
+	float margin;
 	uint mode;
 	Vec4 fontColor;
 
 	void start() override {
 		thisObj->setTexture(texture);
-		tempText = text;
-		tempFont = font;
-		tempFontSize = fontSize;
-		tempLineSize = lineSize;
-		tempMode = mode;
-		size = thisObj->transform.scale;
-		createTextTexture(texture, fontSize, lineSize, size.x, size.y, mode, font, text);
+		createTextTexture(texture, fontSize, lineSize, thisObj->transform.scale, yStart, margin, mode, font, text);
 	}
+
 	void update() override {
 		thisObj->color = fontColor;
-		if (windowScaled || text != tempText || font != tempFont ||
-		size != thisObj->transform.scale || fontSize != tempFontSize ||
-		lineSize != tempLineSize || mode != tempMode) {
-			tempText = text;
-			tempFont = font;
-			tempFontSize = fontSize;
-			tempLineSize = lineSize;
-			tempMode = mode;
-			size = thisObj->transform.scale;
-			createTextTexture(texture, fontSize, lineSize, size.x, size.y, mode, font, text);
-		}
+
 	}
 	void end() override {
 		glDeleteTextures(1, &texture);
 	}
 
-	TextBox() : text(), font(), fontSize(1), lineSize(1), mode(0), fontColor(1), texture(0), tempText(), tempFont(), size(1), tempFontSize(1), tempLineSize(1), tempMode(0) {}
+	void textUpdate() {
+		createTextTexture(texture, fontSize, lineSize, thisObj->transform.scale, yStart, margin, mode, font, text);
+	}
+
+	TextBox() : text(), font(), fontSize(1), lineSize(1), yStart(1), margin(0), mode(0), fontColor(1), texture(0) {}
 
 private :
 	uint texture;
-	std::string tempText;
-	std::string tempFont;
-	Vec2 size;
-	float tempFontSize;
-	float tempLineSize;
-	uint tempMode;
 };
 
 struct Button : scriptBase {
@@ -63,6 +48,8 @@ struct Button : scriptBase {
 		textObj = createObj("square");
 		addObjScript(textObj, (void*)textScr);
 		textObj->transform = thisObj->transform;
+		textObj->depth = thisObj->depth + 0.05;
+		textObj->setParent(thisObj);
 	}
 
 	void update() override {
