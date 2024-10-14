@@ -41,7 +41,7 @@ static const char* const sponge = "Hey, all you Goobers\nIt's time to say howdy 
 void progStart() {
 	setBgColor(0.2, 0.3, 0.3);
 
-	buttonObj = createObj("square");
+	/*buttonObj = createObj("square");
 	buttonObj->transform.scale = Vec3(0.4, 0.3, 1);
 	buttonObj->transform.position = Vec3(_screenRatio - 0.4, 0.7, 0);
 	buttonObj->color = Vec4{ 1, 1, 1, 1 };
@@ -78,7 +78,7 @@ void progStart() {
 	}
 	textFieldScr->textScr->fontSize = 0.2;
 	textFieldScr->textScr->lineSize = 0.21;
-	textFieldScr->textScr->font = "CascadiaCode_NORMAL";
+	textFieldScr->textScr->font = "CascadiaCode_NORMAL";*/
 
 }
 
@@ -87,39 +87,37 @@ double timeCount = 0;
 bool first = true;
 
 void progMain() {
-	if (keyAction::keyHeld(GLFW_KEY_LEFT))
-		square1->transform.position.x -= 0.2f * _deltaTime;
-	if (keyAction::keyHeld(GLFW_KEY_RIGHT))
-		square1->transform.position.x += 0.2f * _deltaTime;
-	if (keyAction::keyHeld(GLFW_KEY_UP))
-		square1->transform.position.y += 0.2f * _deltaTime;
-	if (keyAction::keyHeld(GLFW_KEY_DOWN))
-		square1->transform.position.y -= 0.2f * _deltaTime;
-	if (keyAction::keyHeld(GLFW_KEY_PAGE_UP))
-		square1->transform.scale += 0.1f * _deltaTime;
-	if (keyAction::keyHeld(GLFW_KEY_PAGE_DOWN))
-		square1->transform.scale -= 0.1f * _deltaTime;
-	if (keyAction::keyHeld(GLFW_KEY_KP_8) && keyAction::getNumlock())
-		square1->transform.rotation += 20 * _deltaTime;
-	if (keyAction::keyHeld(GLFW_KEY_KP_2) && keyAction::getNumlock())
-		square1->transform.rotation -= 20 * _deltaTime;
+//	if (keyAction::keyHeld(GLFW_KEY_LEFT))
+//		square1->transform.position.x -= 0.2f * _deltaTime;
+//	if (keyAction::keyHeld(GLFW_KEY_RIGHT))
+//		square1->transform.position.x += 0.2f * _deltaTime;
+//	if (keyAction::keyHeld(GLFW_KEY_UP))
+//		square1->transform.position.y += 0.2f * _deltaTime;
+//	if (keyAction::keyHeld(GLFW_KEY_DOWN))
+//		square1->transform.position.y -= 0.2f * _deltaTime;
+//	if (keyAction::keyHeld(GLFW_KEY_PAGE_UP))
+//		square1->transform.scale += 0.1f * _deltaTime;
+//	if (keyAction::keyHeld(GLFW_KEY_PAGE_DOWN))
+//		square1->transform.scale -= 0.1f * _deltaTime;
+//	if (keyAction::keyHeld(GLFW_KEY_KP_8) && keyAction::getNumlock())
+//		square1->transform.rotation += 20 * _deltaTime;
+//	if (keyAction::keyHeld(GLFW_KEY_KP_2) && keyAction::getNumlock())
+//		square1->transform.rotation -= 20 * _deltaTime;
 
-	//timeCount += deltaTime;
+	timeCount += _deltaTime;
 
-	//if (timeCount >= 2) {
-	//	if (!first) {
-	//		for (uint i = 0; i < 5000; i++) {
-	//			deleteObj(i);
-	//		}
-	//	}
-	//	for (uint i = 0; i < 5000; i++) {
-	//		createObj("square");
-	//	}
-	//	timeCount = 0;
-	//	first = false;
-	//}
-
-
+	if (timeCount >= 2) {
+		if (!first) {
+			for (uint i = 0; i < 5000; i++) {
+				deleteObj(i);
+			}
+		}
+		for (uint i = 0; i < 5000; i++) {
+			createObj("square");
+		}
+		timeCount = 0;
+		first = false;
+	}
 }
 
 void progEnd() {

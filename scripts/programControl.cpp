@@ -44,34 +44,30 @@ int main() {
 
 	uint frameCount = 0;
 	uint frameSay = 100;
-	size_t fpsTotal = 0;
+	size_t delayTotal = 0;
 	size_t frameCatchCount = 0;
 
 
 	while (!glfwWindowShouldClose(mainWindow))
 	{
-		std::chrono::time_point b = std::chrono::high_resolution_clock().now();
+		std::chrono::time_point p = std::chrono::high_resolution_clock().now();
 		glfwPollEvents();
 		update();
 		glfwSwapBuffers(mainWindow);
 
-		frameCount++;
 
 		if (_hideMouse)
 			glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		else
 			glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		
-		_deltaTime = (double)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock().now() - b).count() / 1000000;
-		if (frameCount >= frameSay) {
-			size_t fps = 1000000 / std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock().now() - b).count();
-			fpsTotal += fps;
-			frameCatchCount++;
-			frameCount = 0;
-		}
+		frameCount++;
+		_deltaTime = (double)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock().now() - p).count() / 1000000;
+		std::chrono::time_point f = std::chrono::high_resolution_clock().now();
+		delayTotal += std::chrono::duration_cast<std::chrono::microseconds>(f - p).count();
 	}
 
-	std::cout << "\n\n\nAverage fps : " << fpsTotal / frameCatchCount << "\n";
+	std::cout << "\n\n\nAverage delay : " << delayTotal / frameCount << " microseconds\n";
 
 	end();
 
