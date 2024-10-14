@@ -24,6 +24,8 @@ struct ObjectBase {
 	uint *EBO = nullptr;
 	uint *triCount = nullptr;
 	std::vector<void*> scripts;
+	float depth = 0;
+	float relativeDepth = 0;
 };
 
 struct Transform {
@@ -40,8 +42,7 @@ struct Object : private ObjectBase {
 	std::set<Object*> children;
 	Object* parent;
 	Vec4 color;
-	float depth;
-	float relativeDepth;
+	bool weak;
 
 	//--------------------------getter functions
 
@@ -60,6 +61,12 @@ struct Object : private ObjectBase {
 	uint getTexture() {
 		return *texTarget;
 	}
+	float getDepth() {
+		return depth;
+	}
+	float getRelativeDepth() {
+		return relativeDepth;
+	}
 
 
 	//-------------------------Setter functions
@@ -69,6 +76,18 @@ struct Object : private ObjectBase {
 	}
 	void removeTexture() {
 		texTarget = nullptr;
+	}
+	void setDepth(float nDepth) {
+		depth = nDepth;
+	}
+	void setRelativeDepth(float nDepth) {
+		relativeDepth = nDepth;
+	}
+	void addDepth(float nDepth) {
+		depth += nDepth;
+	}
+	void addRelativeDepth(float nDepth) {
+		relativeDepth += nDepth;
 	}
 	
 
@@ -99,6 +118,8 @@ struct Object : private ObjectBase {
 		depth = relativeDepth + parent->depth;
 	}
 	void removeParent() {
+		if (parent == nullptr)
+			return;
 		parent->children.erase(this);
 		parent = nullptr;
 	}
@@ -113,7 +134,7 @@ struct Object : private ObjectBase {
 
 	//-------------------Constructor
 
-	Object() : transform(), relativeTransform(), parent(nullptr), color(1), depth(0), relativeDepth(0) {}
+	Object() : transform(), relativeTransform(), parent(nullptr), color(1), weak(false) {}
 };
 
 Object* createObj(std::string objName);

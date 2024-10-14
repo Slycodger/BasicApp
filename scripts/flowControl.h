@@ -13,17 +13,22 @@
 #include "MathConstants.h"
 #include "ObjScripts.h"
 #include "Text.h"
+#include <algorithm>
+#include <windows.h>
 
 void start();
 void update();
 void end();
-#endif
 
+void windowMoveCallback(GLFWwindow* window, int xpos, int ypos);
 void windowScaleCallback(GLFWwindow* window, int width, int height);
 void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos);
 void mouseClickCallback(GLFWwindow* window, int button, int action, int mods);
 void keyPressCallback(GLFWwindow* window, int button, int scancode, int action, int mods);
 void mouseScrollCallback(GLFWwindow* window, double xoff, double yoff);
+#endif
+
+
 void deleteObj(Object*& obj);
 void deleteObj(uint index);
 void deleteAll();
@@ -39,3 +44,5 @@ void updateObjScripts(Object*& obj);
 void clearObjScripts(Object*& obj);
 void updateObjChildren(Object*& obj);
 void* getObjScript(Object*& obj, std::string name);
+void clearObjChildren(Object*& obj);
+bool objCmp(const ObjectBase* obj1, const ObjectBase* obj2);

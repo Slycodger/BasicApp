@@ -4,22 +4,32 @@ void progStart();
 void progMain();
 void progEnd();
 
-Vec3 bgColor = Vec3(0);
+//App globals
+
+Vec3 _bgColor = Vec3(0);
+iVec2 _windowPos = iVec2(0);
+iVec2 _realMousePos = iVec2(0);
+
+glm::mat4 _transform(1);
+glm::mat4 _view(1);
+glm::mat4 _projection(1);
+
+bool _windowScaled = false;
+bool _lockMouse = false;
+bool _hideMouse = false;
+
+double _mousePosX = 0;
+double _mousePosY = 0;
+
+
+
+//Local globals
 
 static uint VAO;
 static Shader shader;
 
-glm::mat4 transform(1);
-glm::mat4 view(1);
-glm::mat4 projection(1);
-
-bool windowScaled = false;
-
-
-static ObjectBase* globalObjects[_MAX_OBJECTS];
+static std::vector<ObjectBase*> globalObjects(_MAX_OBJECTS);
 static uint objCount = 0;
-
-static uint myText = 0;
 
 void start() {
 	Text::start();
@@ -31,7 +41,14 @@ void start() {
 	addShader("noTextureShader", "./shaders/NTVertexShader.vert", "./shaders/NTFragmentShader.frag");
 	addShader("textureShader", "./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
 
-	projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+	_projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+
+	if (!loadFont("./fonts/CascadiaCode.ttf", "CascadiaCode")) {
+		std::cout << "Failed to load font\n";
+	}
+	if (!loadFont("./fonts/CascadiaCode-Light.ttf", "CascadiaCodeLight")) {
+		std::cout << "Failed to load font\n";
+	}
 
 	progStart();
 }
@@ -40,12 +57,12 @@ void update() {
 
 	progMain();
 
-	glClearColor(bgColor.x, bgColor.y, bgColor.z, 1);
+	glClearColor(_bgColor.x, _bgColor.y, _bgColor.z, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawAllObjs();
 
-	windowScaled = false;
+	_windowScaled = false;
 
 	giveKeyAction::latchSet();
 }
@@ -64,40 +81,52 @@ void end() {
 //-------------------Functions
 
 void setBgColor(Vec3 color) {
-	bgColor = color;
+	_bgColor = color;
 }
 void setBgColor(float r, float g, float b) {
-	bgColor = Vec3(r, g, b);
+	_bgColor = Vec3(r, g, b);
 }
 
 
 //---------------------OBJECT----HANDLING
 
 void drawAllObjs() {
+	if (objCount == 0)
+		return;
+
 	uint objDrawn = 0;
+	std::sort(globalObjects.begin(), globalObjects.end(), objCmp);
 
 	for (int i = 0; i < _MAX_OBJECTS; i++) {
-		if (objDrawn >= objCount)
-			return;
 		if (globalObjects[i] == nullptr)
 			continue;
 
-		Object* obj = ((Object*)globalObjects[i]);
+		ObjectBase*& objBase = globalObjects[i];
+		Object*& obj = (Object*&)objBase;
 
 		updateObjScripts(obj);
 		if (obj->parent == nullptr)
 			updateObjChildren(obj);
 
-		transform = glm::mat4(1);
-		transform = glm::translate(transform, glm::vec3(obj->transform.position.toGLM(), obj->depth));
-		transform = glm::rotate(transform, (float)degToRad * obj->transform.rotation, glm::vec3(0, 0, 1));
-		transform = glm::scale(transform, glm::vec3(obj->transform.scale.toGLM(), 1));
+		if (obj->weak) {
+			glBlendEquation(GL_FUNC_ADD);
+			glBlendFuncSeparate(GL_ONE_MINUS_DST_ALPHA, GL_DST_ALPHA, GL_ZERO, GL_ONE);
+		}
+		else {
+			glBlendEquation(GL_FUNC_ADD);
+			glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+		}
+
+		_transform = glm::mat4(1);
+		_transform = glm::translate(_transform, glm::vec3(obj->transform.position.toGLM(), objBase->depth));
+		_transform = glm::rotate(_transform, (float)degToRad * obj->transform.rotation, glm::vec3(0, 0, 1));
+		_transform = glm::scale(_transform, glm::vec3(obj->transform.scale.toGLM(), 1));
 		if (obj->usesTexture()) {
 			uint texTarget = obj->getTexture();
 			shader.use(getShader("textureShader"));
-			shader.setMat4("transform", glm::value_ptr(transform));
-			shader.setMat4("view", glm::value_ptr(view));
-			shader.setMat4("projection", glm::value_ptr(projection));
+			shader.setMat4("transform", glm::value_ptr(_transform));
+			shader.setMat4("view", glm::value_ptr(_view));
+			shader.setMat4("projection", glm::value_ptr(_projection));
 			shader.setVec2("screenSize", _Width, _Height);
 			shader.setVec4("color", obj->color);
 			shader.setInt("texture", 0);
@@ -106,22 +135,22 @@ void drawAllObjs() {
 		}
 		else {
 			shader.use(getShader("noTextureShader"));
-			shader.setMat4("transform", glm::value_ptr(transform));
-			shader.setMat4("view", glm::value_ptr(view));
-			shader.setMat4("projection", glm::value_ptr(projection));
+			shader.setMat4("transform", glm::value_ptr(_transform));
+			shader.setMat4("view", glm::value_ptr(_view));
+			shader.setMat4("projection", glm::value_ptr(_projection));
 			shader.setVec4("color", obj->color);
 		}
 
 		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, *globalObjects[i]->VBO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *globalObjects[i]->EBO);
+		glBindBuffer(GL_ARRAY_BUFFER, *objBase->VBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *objBase->EBO);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
-		glDrawElements(GL_TRIANGLES, *globalObjects[i]->triCount, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, *objBase->triCount, GL_UNSIGNED_INT, 0);
 		objDrawn++;
 	}
 
@@ -142,8 +171,10 @@ bool addGlobalObj(ObjectBase*& obj) {
 	uint objSlot = findObjSlot();
 	if (objSlot == _MAX_OBJECTS)
 		return false;
+
 	globalObjects[objSlot] = obj;
 	globalObjects[objSlot]->index = objSlot;
+	
 	objCount++;
 	return true;
 }
@@ -153,25 +184,34 @@ void deleteAll() {
 		if (globalObjects[i] == nullptr)
 			continue;
 		clearObjScripts((Object*&)globalObjects[i]);
+		clearObjChildren((Object*&)globalObjects[i]);
 		delete(globalObjects[i]);
 		globalObjects[i] = nullptr;
 	}
 	objCount = 0;
+	globalObjects.clear();
 }
 
 void deleteObj(uint index) {
-	delete(globalObjects[index]);
+	if (globalObjects[index] == nullptr)
+		return;
 	clearObjScripts((Object*&)globalObjects[index]);
+	clearObjChildren((Object*&)globalObjects[index]);
+	delete(globalObjects[index]);
 	globalObjects[index] = nullptr;
 	objCount--;
 }
 
 void deleteObj(Object*& obj) {
+	if (obj == nullptr)
+		return;
 	uint index = obj->getIndex();
 	clearObjScripts(obj);
+	clearObjChildren(obj);
 	delete(globalObjects[index]);
 	globalObjects[index] = nullptr;
 	objCount--;
+	obj = nullptr;
 }
 
 
@@ -182,12 +222,22 @@ void windowScaleCallback(GLFWwindow* window, int width, int height) {
 	_Height = height;
 	_screenRatio = (float)_Width / _Height;
 	glViewport(0, 0, width, height);
-	projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
-	windowScaled = true;
+	_projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
+	_windowScaled = true;
+}
+void windowMoveCallback(GLFWwindow* window, int xpos, int ypos) {
+	_windowPos.x = xpos;
+	_windowPos.y = ypos;
 }
 void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos) {
-	mousePosX = xpos / _Height * 2 - _screenRatio;
-	mousePosY = (_Height - ypos) / _Height * 2 - 1;
+	if (_lockMouse) {
+		SetCursorPos(_windowPos.x + _realMousePos.x, _windowPos.y + _realMousePos.y);
+		return;
+	}
+
+	_realMousePos = { xpos, ypos };
+	_mousePosX = xpos / _Height * 2 - _screenRatio;
+	_mousePosY = (_Height - ypos) / _Height * 2 - 1;
 }
 void keyPressCallback(GLFWwindow* window, int button, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS)
@@ -195,6 +245,7 @@ void keyPressCallback(GLFWwindow* window, int button, int scancode, int action, 
 	else if (action == GLFW_RELEASE)
 		giveKeyAction::keyReleased(button);
 	giveKeyAction::setNumlock(mods & GLFW_MOD_NUM_LOCK);
+	giveKeyAction::setShift(mods & GLFW_MOD_SHIFT);
 }
 void mouseScrollCallback(GLFWwindow* window, double xoff, double yoff) {
 	if (yoff > 0)
@@ -279,6 +330,15 @@ void clearObjScripts(Object*& obj) {
 	((ObjectBase*)obj)->scripts.clear();
 }
 
+void clearObjChildren(Object*& obj) {
+	if (obj->children.size() == 0)
+		return;
+	for (auto child : obj->children) {
+		child->parent == nullptr;
+	}
+	obj->children.clear();
+}
+
 void updateObjChildren(Object*& obj) {
 	if (obj->children.size() == 0)
 		return;
@@ -286,4 +346,14 @@ void updateObjChildren(Object*& obj) {
 		child->setToRelative();
 		updateObjChildren(child);
 	}
+}
+
+bool objCmp(const ObjectBase* obj1, const ObjectBase* obj2) {
+	if (obj1 == nullptr && obj2 == nullptr)
+		return false;
+	if (obj1 != nullptr && obj2 == nullptr)
+		return true;
+	if (obj1 == nullptr && obj2 != nullptr)
+		return false;
+	return obj1->depth < obj2->depth;
 }

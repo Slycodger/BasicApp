@@ -1,6 +1,12 @@
 #pragma once
-#include "typeDefs.h"
 
+#if defined(_INPUT)
+#include "OpenGL.h"
+
+#endif
+
+#include "typeDefs.h"
+#include <string>
 
 struct buttonState {
 	bool pressed = false;
@@ -17,6 +23,7 @@ namespace giveKeyAction {
 	void scrolledUp();
 	void scrolledDown();
 	void setNumlock(bool val);
+	void setShift(bool val);
 }
 
 namespace keyAction {
@@ -26,5 +33,7 @@ namespace keyAction {
 	bool scrolling();
 	bool scrollUp();
 	bool scrollDown();
-	bool numlock();
+	bool getNumlock();
+	bool getShift();
+	void buildText(std::string& text);
 }

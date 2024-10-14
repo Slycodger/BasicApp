@@ -198,6 +198,9 @@ struct iVec2 {
 	iVec2() : x(0), y(0) {}
 	iVec2(int val) : x(val), y(val) {}
 	iVec2(int m, int n) : x(m), y(n) {}
+	iVec2(double m, int n) : x(m), y(n) {}
+	iVec2(int m, double n) : x(m), y(n) {}
+	iVec2(double m, double n) : x(m), y(n) {}
 };
 
 struct uiVec2 {
