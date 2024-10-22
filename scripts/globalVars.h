@@ -2,9 +2,6 @@
 #include "typeDefs.h"
 #include "Vector.h"
 #include "OpenGL.h"
-extern glm::mat4 _transform;
-extern glm::mat4 _view;
-extern glm::mat4 _projection;
 extern iVec2 _realMousePos;
 extern iVec2 _windowPos;
 extern Vec3 _bgColor;

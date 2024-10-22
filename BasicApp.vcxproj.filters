@@ -44,6 +44,9 @@
     <ClCompile Include="scripts\IntializeShader.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
+    <ClCompile Include="scripts\GlobalScripts.cpp">
+      <Filter>Script Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\NTVertexShader.vert">

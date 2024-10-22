@@ -198,9 +198,9 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size,
 
 	shader.active();
 	shader.setInt("texTarget", 0);
-	shader.setMat4("projection", glm::value_ptr(ortho));
+	shader.setMat4("projection", ortho);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glDeleteTextures(1, &texture);
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -211,6 +211,12 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size,
 	glViewport(0, 0, screenX, screenY);
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
 
 
 	//Draws text on the left hand side of the text
@@ -368,8 +374,12 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size,
 	}
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, _Width, _Height);
+    glEnable(GL_STENCIL_TEST);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
 }
 
 

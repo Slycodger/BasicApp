@@ -111,6 +111,8 @@
       <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>.\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <Optimization>Disabled</Optimization>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,6 +154,7 @@ xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s</Command>
   <ItemGroup>
     <ClCompile Include="glad\src\glad.c" />
     <ClCompile Include="scripts\FlowControl.cpp" />
+    <ClCompile Include="scripts\GlobalScripts.cpp" />
     <ClCompile Include="scripts\Input.cpp" />
     <ClCompile Include="scripts\IntializeShader.cpp" />
     <ClCompile Include="scripts\Main.cpp" />

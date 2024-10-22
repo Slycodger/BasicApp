@@ -15,6 +15,7 @@ namespace Objects {
 #include <Vector>
 #include <limits>
 #include "Shapes.h"
+#include <iostream>
 #include "MathConstants.h"
 
 struct ObjectBase {
@@ -26,12 +27,13 @@ struct ObjectBase {
 	std::vector<void*> scripts;
 	float depth = 0;
 	float relativeDepth = 0;
+	ObjectBase() : index(0), texTarget(nullptr), VBO(nullptr), EBO(nullptr), triCount(nullptr), scripts(), depth(0), relativeDepth(0) {}
 };
 
 struct Transform {
-	Vec2 position;
-	Vec2 scale;
-	float rotation;
+	Vec2 position = 0;
+	Vec2 scale = 1;
+	float rotation = 0;
 
 	Transform() : position(0), scale(1), rotation(0) {}
 };
@@ -40,9 +42,19 @@ struct Object : private ObjectBase {
 	Transform transform;
 	Transform relativeTransform;
 	std::set<Object*> children;
-	Object* parent;
-	Vec4 color;
-	bool weak;
+    std::set<Object*> dependencies;
+    Object* dependent = nullptr;
+	Object* parent = nullptr;
+	Vec4 color = 1;
+	bool weak = false;
+	bool active = true;
+
+
+	//-------------------Constructor
+    //-------------------Destructor
+
+	Object() : transform(), relativeTransform(), children(), dependencies(), parent(nullptr), color(1), weak(false), active(true) {}
+    ~Object() {}
 
 	//--------------------------getter functions
 
@@ -109,11 +121,15 @@ struct Object : private ObjectBase {
 		if (parent == nullptr)
 			return;
 		float angle = parent->transform.rotation + relativeTransform.rotation;
-		transform.position.x = cos(angle * degToRad);
-		transform.position.y = sin(angle * degToRad);
-		transform.position *= (parent->transform.scale * relativeTransform.position).magnitude();
 		transform.scale = relativeTransform.scale * parent->transform.scale;
+		transform.position = relativeTransform.position * parent->transform.scale;
+
+		transform.position.x = transform.position.x * cos(angle * degToRad) - transform.position.y * sin(angle * degToRad);
+		transform.position.y = transform.position.y * cos(angle * degToRad) + transform.position.x * sin(angle * degToRad);
+
 		transform.position += parent->transform.position;
+
+
 		transform.rotation = angle;
 		depth = relativeDepth + parent->depth;
 	}
@@ -125,16 +141,36 @@ struct Object : private ObjectBase {
 	}
 
 
+    //Dependent object stuff
+
+    void setDependent(Object* obj) {
+        removeDependent();
+
+        dependent = obj;
+        obj->dependencies.insert(this);
+    }
+
+    void removeDependent() {
+        if (dependent == nullptr)
+            return;
+        dependent->dependencies.erase(this);
+        dependent = nullptr;
+    }
+
+
+
 	//------------------------------Checking functions
 
 	bool usesTexture() {
 		return texTarget == nullptr ? false : true;
 	}
-
-
-	//-------------------Constructor
-
-	Object() : transform(), relativeTransform(), parent(nullptr), color(1), weak(false) {}
+	static bool parentOff(Object*& obj) {
+		if (obj->parent == nullptr)
+			return false;
+		if (!obj->parent->active)
+			return true;
+		return parentOff(obj->parent);
+	}
 };
 
 Object* createObj(std::string objName);

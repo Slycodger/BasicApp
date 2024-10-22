@@ -16,11 +16,9 @@ glm::mat4 _projection(1);
 
 bool _windowScaled = false;
 bool _lockMouse = false;
-bool _hideMouse = false;
 
 double _mousePosX = 0;
 double _mousePosY = 0;
-
 
 
 //Local globals
@@ -54,14 +52,13 @@ void start() {
 }
 
 void update() {
-
-	progMain();
+    progMain();
 
 	glClearColor(_bgColor.x, _bgColor.y, _bgColor.z, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	drawAllObjs();
 
+    drawAllObjs();
 	_windowScaled = false;
 
 	giveKeyAction::latchSet();
@@ -96,17 +93,38 @@ void drawAllObjs() {
 
 	uint objDrawn = 0;
 	std::sort(globalObjects.begin(), globalObjects.end(), objCmp);
+    Object* prevDependent = nullptr;
 
 	for (int i = 0; i < _MAX_OBJECTS; i++) {
-		if (globalObjects[i] == nullptr)
-			continue;
+		if (objDrawn >= objCount)
+			break;
+        if (globalObjects[i] == nullptr)
+            continue;
 
 		ObjectBase*& objBase = globalObjects[i];
 		Object*& obj = (Object*&)objBase;
 
-		updateObjScripts(obj);
-		if (obj->parent == nullptr)
-			updateObjChildren(obj);
+		if (!obj->active || Object::parentOff(obj)) {
+			objDrawn++;
+			continue;
+		}
+
+        if (obj->parent == nullptr)
+            updateObjChildren(obj);
+        updateObjScripts(obj);
+
+        if (obj->dependent != nullptr) {
+            glEnable(GL_STENCIL_TEST);
+            if (obj->dependent != prevDependent) {
+                glClear(GL_STENCIL_BUFFER_BIT);
+                drawObjStencil(obj->dependent);
+            }
+            prevDependent = obj->dependent;
+            glStencilFunc(GL_EQUAL, 0x01, 0xFF);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        }
+        else
+            glDisable(GL_STENCIL_TEST);
 
 		if (obj->weak) {
 			glBlendEquation(GL_FUNC_ADD);
@@ -124,20 +142,19 @@ void drawAllObjs() {
 		if (obj->usesTexture()) {
 			uint texTarget = obj->getTexture();
 			shader.use(getShader("textureShader"));
-			shader.setMat4("transform", glm::value_ptr(_transform));
-			shader.setMat4("view", glm::value_ptr(_view));
-			shader.setMat4("projection", glm::value_ptr(_projection));
-			shader.setVec2("screenSize", _Width, _Height);
+			shader.setMat4("transform", _transform);
+			shader.setMat4("view", _view);
+			shader.setMat4("projection", _projection);
 			shader.setVec4("color", obj->color);
-			shader.setInt("texture", 0);
+			shader.setInt("texTarget", 0);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texTarget);
 		}
 		else {
 			shader.use(getShader("noTextureShader"));
-			shader.setMat4("transform", glm::value_ptr(_transform));
-			shader.setMat4("view", glm::value_ptr(_view));
-			shader.setMat4("projection", glm::value_ptr(_projection));
+			shader.setMat4("transform", _transform);
+			shader.setMat4("view", _view);
+			shader.setMat4("projection", _projection);
 			shader.setVec4("color", obj->color);
 		}
 
@@ -153,10 +170,43 @@ void drawAllObjs() {
 		glDrawElements(GL_TRIANGLES, *objBase->triCount, GL_UNSIGNED_INT, 0);
 		objDrawn++;
 	}
-
+    glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void drawObjStencil(Object* obj) {
+    glStencilFunc(GL_ALWAYS, 0x01, 0xFF);
+    glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+    glDisable(GL_DEPTH_TEST);
+    glColorMask(0, 0, 0, 0);
+
+    ObjectBase*& objBase = (ObjectBase*&)obj;
+
+    _transform = glm::mat4(1);
+    _transform = glm::translate(_transform, glm::vec3(obj->transform.position.toGLM(), objBase->depth));
+    _transform = glm::rotate(_transform, (float)degToRad * obj->transform.rotation, glm::vec3(0, 0, 1));
+    _transform = glm::scale(_transform, glm::vec3(obj->transform.scale.toGLM(), 1));
+
+    shader.use(getShader("noTextureShader"));
+    shader.setMat4("transform", _transform);
+    shader.setMat4("view", _view);
+    shader.setMat4("projection", _projection);
+    
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, *objBase->VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *objBase->EBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glDrawElements(GL_TRIANGLES, *objBase->triCount, GL_UNSIGNED_INT, 0);
+
+    glEnable(GL_DEPTH_TEST);
+    glColorMask(1, 1, 1, 1);
 }
 
 uint findObjSlot() {
@@ -190,6 +240,7 @@ void deleteAll() {
 	}
 	objCount = 0;
 	globalObjects.clear();
+	globalObjects.~vector();
 }
 
 void deleteObj(uint index) {
@@ -280,6 +331,7 @@ void addObjScript(Object*& obj, void* script, std::string scrName) {
 /// </summary>
 void removeObjScript(Object*& obj, unsigned int index) {
 	((scriptBase*)((ObjectBase*)obj)->scripts[index])->end();
+	((scriptBase*)((ObjectBase*)obj)->scripts[index])->name.~basic_string();
 	delete(((ObjectBase*)obj)->scripts[index]);
 	((ObjectBase*)obj)->scripts.erase(((ObjectBase*)obj)->scripts.begin() + index);
 }
@@ -325,6 +377,7 @@ void updateObjScripts(Object*& obj) {
 void clearObjScripts(Object*& obj) {
 	for (uint i = 0; i < ((ObjectBase*)obj)->scripts.size(); i++) {
 		((scriptBase*)((ObjectBase*)obj)->scripts[i])->end();
+		((scriptBase*)((ObjectBase*)obj)->scripts[i])->name.~basic_string();
 		delete(((ObjectBase*)obj)->scripts[i]);
 	}
 	((ObjectBase*)obj)->scripts.clear();
@@ -355,5 +408,7 @@ bool objCmp(const ObjectBase* obj1, const ObjectBase* obj2) {
 		return true;
 	if (obj1 == nullptr && obj2 != nullptr)
 		return false;
+    if (obj1->depth == obj2->depth)
+        return false;
 	return obj1->depth < obj2->depth;
 }

@@ -24,6 +24,7 @@ namespace giveKeyAction {
 	void scrolledDown();
 	void setNumlock(bool val);
 	void setShift(bool val);
+	void setIgnore(bool val);
 }
 
 namespace keyAction {

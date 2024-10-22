@@ -9,7 +9,7 @@
 #include "GlobalScripts.h"
 #include <iostream>
 
-struct changeColorButton : public Button {
+struct changeColorButton : public ButtonMain {
 	Vec4 color = 0;
 	bool click = false;
 	void onPressed() override {
@@ -28,30 +28,35 @@ struct changeColorButton : public Button {
 };
 
 
-static Object* buttonObj = nullptr;
+static Object* dropDownFieldObj = nullptr;
 static Object* square1 = nullptr;
 static Object* square2 = nullptr;
 static Object* textFieldObj = nullptr;
 
 static TextField* textFieldScr = nullptr;
-static changeColorButton* buttonScr = nullptr;
+DropDownFieldStatic* dropDownFieldScr = nullptr;
 
 static const char* const sponge = "Hey, all you Goobers\nIt's time to say howdy to your favorite undersea peanut, Goofy Goober\n(Yeah)\n(Yeah)\n(Yeah)\n\nAlright, folks, this one goes out to my two bestest friends in the whole world\nPatrick and this big peanut guy\nIt's a little ditty called\nGoofy Goober (yeah)\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\n\nDJ (yeah), time for the test (yeah)\nNo baby can resist singin' along to this (yeah)\n(Yeah, yeah)\n(Yeah, yeah)\n(Yeah, yeah)\n\nSpongeBob, it's the Goofy Goober theme song\nI know\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah\n\nAnd here's your Triple Gooberberry Sunrise, sir\nOoh\nOh, Triple Gooberberry Sunrise, huh?\nI guess I could use one of those\nThere you go\n\nBoy, Pat, that hit the spot\nI'm feeling better already\nYeah\nWaiter, let's get another round over here\n\nOh, I'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)\nI'm a goofy goober, yeah\nYou're a goofy goober, yeah\nWe're all goofy goobers, yeah\nGoofy, goofy, goober, goober, yeah (yeah)";
 
 void progStart() {
 	setBgColor(0.2, 0.3, 0.3);
 
-	/*buttonObj = createObj("square");
-	buttonObj->transform.scale = Vec3(0.4, 0.3, 1);
-	buttonObj->transform.position = Vec3(_screenRatio - 0.4, 0.7, 0);
-	buttonObj->color = Vec4{ 1, 1, 1, 1 };
+	dropDownFieldObj = createObj("square");
+	dropDownFieldObj->transform.scale = Vec3(0.4, 0.15, 1);
+	dropDownFieldObj->transform.position = Vec3(_screenRatio - 0.4, 0.85, 0);
+	dropDownFieldObj->color = Vec4(0.5, 0.5, 0.5, 1);
 
-	buttonScr = new changeColorButton;
+	dropDownFieldScr = new DropDownFieldStatic;
+	dropDownFieldScr->buttonText.font = "CascadiaCode_NORMAL";
+	dropDownFieldScr->buttonText.mode = TEXT_CENTER_RENDER;
+	dropDownFieldScr->buttonText.fontSize = 0.5;
+	dropDownFieldScr->buttonText.lineSize = 0.32;
+	dropDownFieldScr->buttonText.fontColor = Vec4(0, 0, 0, 1);
 
-	{
-		std::string name = typeid(buttonScr).name();
-		addObjScript(buttonObj, (void*)buttonScr, name.substr(name.find(' ') + 1));
-	}
+
+	addObjScript(dropDownFieldObj, (void*)dropDownFieldScr, dropDownFieldScr->name);
+
+    dropDownFieldScr->addOption("hey");
 
 	square1 = createObj("square");
 	square2 = createObj("square");
@@ -68,56 +73,62 @@ void progStart() {
 	square2->color = { 1, 0, 0, 1 };
 	square2->weak = true;
 
+
 	textFieldObj = createObj("square");
 	textFieldScr = new TextField();
 	textFieldObj->transform.scale = { 1.5, 0.3 };
 	textFieldObj->transform.position = { -_screenRatio + 1.5f, -0.7 };
-	{
-		std::string name = typeid(textFieldScr).name();
-		addObjScript(textFieldObj, (void*)textFieldScr, name.substr(name.find(' ') + 1));
-	}
+    addObjScript(textFieldObj, (void*)textFieldScr, textFieldScr->name);
+
 	textFieldScr->textScr->fontSize = 0.2;
 	textFieldScr->textScr->lineSize = 0.21;
-	textFieldScr->textScr->font = "CascadiaCode_NORMAL";*/
-
+	textFieldScr->textScr->font = "CascadiaCode_NORMAL";
 }
 
 
-double timeCount = 0;
-bool first = true;
+//double timeCount = 0;
+//bool first = true;
 
 void progMain() {
-//	if (keyAction::keyHeld(GLFW_KEY_LEFT))
-//		square1->transform.position.x -= 0.2f * _deltaTime;
-//	if (keyAction::keyHeld(GLFW_KEY_RIGHT))
-//		square1->transform.position.x += 0.2f * _deltaTime;
-//	if (keyAction::keyHeld(GLFW_KEY_UP))
-//		square1->transform.position.y += 0.2f * _deltaTime;
-//	if (keyAction::keyHeld(GLFW_KEY_DOWN))
-//		square1->transform.position.y -= 0.2f * _deltaTime;
-//	if (keyAction::keyHeld(GLFW_KEY_PAGE_UP))
-//		square1->transform.scale += 0.1f * _deltaTime;
-//	if (keyAction::keyHeld(GLFW_KEY_PAGE_DOWN))
-//		square1->transform.scale -= 0.1f * _deltaTime;
-//	if (keyAction::keyHeld(GLFW_KEY_KP_8) && keyAction::getNumlock())
-//		square1->transform.rotation += 20 * _deltaTime;
-//	if (keyAction::keyHeld(GLFW_KEY_KP_2) && keyAction::getNumlock())
-//		square1->transform.rotation -= 20 * _deltaTime;
+	if (keyAction::keyHeld(GLFW_KEY_LEFT))
+        square2->transform.position.x -= 0.2f * _deltaTime;
+	if (keyAction::keyHeld(GLFW_KEY_RIGHT))
+        square2->transform.position.x += 0.2f * _deltaTime;
+	if (keyAction::keyHeld(GLFW_KEY_UP))
+        square2->transform.position.y += 0.2f * _deltaTime;
+	if (keyAction::keyHeld(GLFW_KEY_DOWN))
+        square2->transform.position.y -= 0.2f * _deltaTime;
+	if (keyAction::keyHeld(GLFW_KEY_PAGE_UP))
+		square1->transform.scale += 0.1f * _deltaTime;
+	if (keyAction::keyHeld(GLFW_KEY_PAGE_DOWN))
+		square1->transform.scale -= 0.1f * _deltaTime;
+	if (keyAction::keyHeld(GLFW_KEY_KP_8) && keyAction::getNumlock())
+		square1->transform.rotation += 20 * _deltaTime;
+	if (keyAction::keyHeld(GLFW_KEY_KP_2) && keyAction::getNumlock())
+		square1->transform.rotation -= 20 * _deltaTime;
+	
+	if (keyAction::keyPressed(GLFW_KEY_SPACE))
+		dropDownFieldScr->addOption("another one");
+    if (keyAction::keyPressed(GLFW_KEY_J)) {
+        ((VoidButton*)((ObjectBase*)dropDownFieldScr->optionObjs[3].first)->scripts[0])->textScr->textUpdate();
+    }
 
-	timeCount += _deltaTime;
 
-	if (timeCount >= 2) {
-		if (!first) {
-			for (uint i = 0; i < 5000; i++) {
-				deleteObj(i);
-			}
-		}
-		for (uint i = 0; i < 5000; i++) {
-			createObj("square");
-		}
-		timeCount = 0;
-		first = false;
-	}
+
+	//timeCount += _deltaTime;
+
+	//if (timeCount >= 2) {
+	//	if (!first) {
+	//		for (uint i = 0; i < 5000; i++) {
+	//			deleteObj(i);
+	//		}
+	//	}
+	//	for (uint i = 0; i < 5000; i++) {
+	//		createObj("square");
+	//	}
+	//	timeCount = 0;
+	//	first = false;
+	//}
 }
 
 void progEnd() {
