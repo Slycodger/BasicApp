@@ -122,10 +122,9 @@ struct Object : private ObjectBase {
 			return;
 		float angle = parent->transform.rotation + relativeTransform.rotation;
 		transform.scale = relativeTransform.scale * parent->transform.scale;
-		transform.position = relativeTransform.position * parent->transform.scale;
 
-		transform.position.x = transform.position.x * cos(angle * degToRad) - transform.position.y * sin(angle * degToRad);
-		transform.position.y = transform.position.y * cos(angle * degToRad) + transform.position.x * sin(angle * degToRad);
+		transform.position.x = relativeTransform.position.x * parent->transform.scale.x * cos(angle * degToRad) - relativeTransform.position.y * parent->transform.scale.y * sin(angle * degToRad);
+		transform.position.y = relativeTransform.position.y * parent->transform.scale.y * cos(angle * degToRad) + relativeTransform.position.x * parent->transform.scale.x * sin(angle * degToRad);
 
 		transform.position += parent->transform.position;
 
