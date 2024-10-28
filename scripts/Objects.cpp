@@ -6,6 +6,7 @@ bool addGlobalObj(ObjectBase*&);
 static std::map<std::string, std::tuple<uint*, uint*, uint*>> objTypes;
 
 unsigned int squareVBO, squareEBO, squareTriCount;
+unsigned int triangleVBO, triangleEBO, triangleTriCount;
 
 namespace Objects {
 	//Creates default objects
@@ -13,6 +14,10 @@ namespace Objects {
 		createBufferObj(squareVBO, squareEBO, squareVertices, squareIndices, sizeof(squareVertices), sizeof(squareIndices));
 		squareTriCount = 6;
 		loadBufferObj("square", &squareVBO, &squareEBO, &squareTriCount);
+
+        createBufferObj(triangleVBO, triangleEBO, triangleVertices, triangleIndices, sizeof(triangleVertices), sizeof(triangleIndices));
+        triangleTriCount = 3;
+        loadBufferObj("triangle", &triangleVBO, &triangleEBO, &triangleTriCount);
 
 	}
 

@@ -163,12 +163,14 @@ struct Object : private ObjectBase {
 	bool usesTexture() {
 		return texTarget == nullptr ? false : true;
 	}
-	static bool parentOff(Object*& obj) {
+	static bool chainActive(Object*& obj) {
+        if (!obj->active)
+            return false;
 		if (obj->parent == nullptr)
-			return false;
-		if (!obj->parent->active)
 			return true;
-		return parentOff(obj->parent);
+		if (!obj->parent->active)
+			return false;
+		return chainActive(obj->parent);
 	}
 };
 

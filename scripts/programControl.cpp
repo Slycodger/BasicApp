@@ -9,6 +9,7 @@ float _screenRatio = (float)_Width / _Height;
 double _deltaTime = 0;
 bool _closeApp = false;
 bool _hideMouse = false;
+bool _vsync = false;
 
 int main() {
 	if (!glfwInit()) {
@@ -29,10 +30,8 @@ int main() {
 	glfwSetScrollCallback(mainWindow, mouseScrollCallback);
 	glfwSetWindowPosCallback(mainWindow, windowMoveCallback);
 
-	glfwSwapInterval(0);
 
 	glfwSetInputMode(mainWindow, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
-	glfwSwapInterval(0);
 
 	if (!gladLoadGL()) {
 		std::cout << "Failed to load GL\n";
@@ -57,9 +56,16 @@ int main() {
 		else
 			glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
+        if (_closeApp)
+            glfwSetWindowShouldClose(mainWindow, 1);
+        if (_vsync)
+            glfwSwapInterval(1);
+        else
+            glfwSwapInterval(0);
+
 		delay = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock().now() - i).count();
 		_deltaTime = (double)delay / 1000000;
-	}
+    }
 
 	end();
 
@@ -71,4 +77,10 @@ int main() {
 //Windows only
 static int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR pCmdLine, _In_ int nCmdShow) {
 	main();
+}
+
+//Class operators
+std::ostream& operator <<(std::ostream& stream, const Vec2& val) {
+    stream << val.x << ", " << val.y;
+    return stream;
 }

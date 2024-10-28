@@ -6,7 +6,7 @@ void progEnd();
 
 //App globals
 
-Vec3 _bgColor = Vec3(0);
+Vec4 _bgColor = Vec4(0);
 iVec2 _windowPos = iVec2(0);
 iVec2 _realMousePos = iVec2(0);
 
@@ -17,8 +17,8 @@ glm::mat4 _projection(1);
 bool _windowScaled = false;
 bool _lockMouse = false;
 
-double _mousePosX = 0;
-double _mousePosY = 0;
+float _mousePosX = 0;
+float _mousePosY = 0;
 
 
 //Local globals
@@ -30,31 +30,28 @@ static std::vector<ObjectBase*> globalObjects(_MAX_OBJECTS);
 static uint objCount = 0;
 
 void start() {
-	Text::start();
-	Objects::start();
 	for (uint i = 0; i < _MAX_OBJECTS; i++) {
 		globalObjects[i] = nullptr;
 	}
+
+    Text::start();
+    Objects::start();
+    ProgUI::start();
+
 
 	addShader("noTextureShader", "./shaders/NTVertexShader.vert", "./shaders/NTFragmentShader.frag");
 	addShader("textureShader", "./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
 
 	_projection = glm::ortho(-_screenRatio, _screenRatio, -1.0f, 1.0f, -1.0f, 1.0f);
 
-	if (!loadFont("./fonts/CascadiaCode.ttf", "CascadiaCode")) {
-		std::cout << "Failed to load font\n";
-	}
-	if (!loadFont("./fonts/CascadiaCode-Light.ttf", "CascadiaCodeLight")) {
-		std::cout << "Failed to load font\n";
-	}
-
 	progStart();
 }
 
 void update() {
     progMain();
+    ProgUI::update();
 
-	glClearColor(_bgColor.x, _bgColor.y, _bgColor.z, 0);
+	glClearColor(_bgColor.x, _bgColor.y, _bgColor.z, _bgColor.w);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -77,11 +74,11 @@ void end() {
 
 //-------------------Functions
 
-void setBgColor(Vec3 color) {
+void setBgColor(Vec4 color) {
 	_bgColor = color;
 }
-void setBgColor(float r, float g, float b) {
-	_bgColor = Vec3(r, g, b);
+void setBgColor(float r, float g, float b, float a) {
+	_bgColor = Vec4(r, g, b, a);
 }
 
 
@@ -104,7 +101,7 @@ void drawAllObjs() {
 		ObjectBase*& objBase = globalObjects[i];
 		Object*& obj = (Object*&)objBase;
 
-		if (!obj->active || Object::parentOff(obj)) {
+		if (!Object::chainActive(obj)) {
 			objDrawn++;
 			continue;
 		}
@@ -318,11 +315,10 @@ void mouseClickCallback(GLFWwindow* window, int button, int action, int mods) {
 /// <summary>
 /// 
 /// </summary>
-void addObjScript(Object*& obj, void* script, std::string scrName) {
+void addObjScript(Object*& obj, void* script) {
 	((ObjectBase*)obj)->scripts.push_back(script);
 	scriptBase* realScr = (scriptBase*)script;
 	realScr->thisObj = obj;
-	realScr->name = scrName;
 	realScr->start();
 }
 
@@ -331,7 +327,7 @@ void addObjScript(Object*& obj, void* script, std::string scrName) {
 /// </summary>
 void removeObjScript(Object*& obj, unsigned int index) {
 	((scriptBase*)((ObjectBase*)obj)->scripts[index])->end();
-	((scriptBase*)((ObjectBase*)obj)->scripts[index])->name.~basic_string();
+	((scriptBase*)((ObjectBase*)obj)->scripts[index])->scrName.~basic_string();
 	delete(((ObjectBase*)obj)->scripts[index]);
 	((ObjectBase*)obj)->scripts.erase(((ObjectBase*)obj)->scripts.begin() + index);
 }
@@ -343,7 +339,7 @@ void removeObjScript(Object*& obj, unsigned int index) {
 unsigned int getObjScriptIndex(Object*& obj, std::string name) {
 	for (uint i = 0; i < ((ObjectBase*)obj)->scripts.size(); i++) {
 		scriptBase* realScr = (scriptBase*)((ObjectBase*)obj)->scripts[i];
-		if (realScr->name == name) {
+		if (realScr->scrName == name) {
 			return i;
 		}
 	}
@@ -377,7 +373,7 @@ void updateObjScripts(Object*& obj) {
 void clearObjScripts(Object*& obj) {
 	for (uint i = 0; i < ((ObjectBase*)obj)->scripts.size(); i++) {
 		((scriptBase*)((ObjectBase*)obj)->scripts[i])->end();
-		((scriptBase*)((ObjectBase*)obj)->scripts[i])->name.~basic_string();
+		((scriptBase*)((ObjectBase*)obj)->scripts[i])->scrName.~basic_string();
 		delete(((ObjectBase*)obj)->scripts[i]);
 	}
 	((ObjectBase*)obj)->scripts.clear();

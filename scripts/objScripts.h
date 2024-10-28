@@ -6,6 +6,6 @@ struct scriptBase {
 	virtual void start() {}
 	virtual void update() {}
 	virtual void end() {}
-	std::string name;
+	std::string scrName;
 	Object* thisObj = nullptr;
 };

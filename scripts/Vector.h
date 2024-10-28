@@ -1,6 +1,7 @@
 #pragma once
 #include "OpenGL.h"
 #include "TypeDefs.h"
+#include <iostream>
 
 struct Vec4 {
 	float x = 0;
@@ -189,6 +190,8 @@ struct Vec2 {
 		temp.y += val.y;
 		return temp;
 	}
+
+    friend std::ostream& operator <<(std::ostream& stream, const Vec2& val);
 };
 
 struct iVec2 {

@@ -8,11 +8,11 @@
 #include "FlowControl.h"
 #endif
 
-struct TextBox : protected scriptBase {
+struct TextBox : public scriptBase {
     constexpr static const char* name = "TextBox";
 
 	std::string text;
-	std::string font;
+	std::string font = "CascadiaCode_NORMAL";
 	float fontSize = 1;
 	float lineSize = 1;
 	float yStart = 1;
@@ -21,6 +21,8 @@ struct TextBox : protected scriptBase {
 	Vec4 fontColor = 1;
 
 	void start() override {
+        scrName = name;
+
 		thisObj->setTexture(texture);
 		createTextTexture(texture, fontSize, lineSize, thisObj->transform.scale, yStart, margin, mode, font, text);
 	}
@@ -60,7 +62,7 @@ private :
 };
 
 
-struct ButtonMain : protected scriptBase {
+struct ButtonMain : public scriptBase {
     constexpr static const char* name = "ButtonMain";
 
 	Object* textObj = nullptr;
@@ -68,6 +70,8 @@ struct ButtonMain : protected scriptBase {
 	bool held = false;
 
 	void start() override {
+        scrName = name;
+
 		textScr = new TextBox();
 
 		textObj = createObj("square");
@@ -84,7 +88,7 @@ struct ButtonMain : protected scriptBase {
         textObj->setRelativeDepth(0.05f);
         textObj->setToRelative();
 
-        addObjScript(textObj, (void*)textScr, textScr->name);
+        addObjScript(textObj, (void*)textScr);
 
 		cStart();
 	}
@@ -124,7 +128,7 @@ struct ButtonMain : protected scriptBase {
 };
 
 
-struct Button : protected scriptBase {
+struct Button : public scriptBase {
     constexpr static const char* name = "Button";
 
 	Object* textObj = nullptr;
@@ -132,15 +136,20 @@ struct Button : protected scriptBase {
 	bool held = false;
 
 	void (*onPressed)() = nullptr;
+	void (*BonPressed)(Button*) = nullptr;
 	void (*onHeld)() = nullptr;
+	void (*BonHeld)(Button*) = nullptr;
 	void (*onReleased)() = nullptr;
+	void (*BonReleased)(Button*) = nullptr;
 
 	void start() override {
+        scrName = name;
+
 		textScr = new TextBox();
 
 		textObj = createObj("square");
 		textScr->text = "Button";
-		textScr->font = "CascadiaCode_SMALL";
+		textScr->font = "CascadiaCode_NORMAL";
 		textScr->fontSize = 0.5;
 		textScr->lineSize = 0.55;
 		textScr->mode = TEXT_CENTER_RENDER;
@@ -151,15 +160,17 @@ struct Button : protected scriptBase {
         textObj->setParent(thisObj);
         textObj->setRelativeDepth(0.05f);
 
-		addObjScript(textObj, (void*)textScr, textScr->name);
+		addObjScript(textObj, (void*)textScr);
 	}
 
 
 	void update() override {
 		if (keyAction::keyReleased(GLFW_MOUSE_BUTTON_1) && held) {
 			held = false;
-			if (onReleased)
-				onReleased();
+            if (onReleased)
+                onReleased();
+            else if (BonReleased)
+                BonReleased(this);
 			return;
 		}
 
@@ -169,23 +180,25 @@ struct Button : protected scriptBase {
 		float top = thisObj->transform.position.y + thisObj->transform.scale.y;
 		if (keyAction::keyPressed(GLFW_MOUSE_BUTTON_1)) {
 			if (_mousePosX <= right && _mousePosX >= left && _mousePosY <= top && _mousePosY >= bottom) {
-				if (onPressed)
-					onPressed();
+                if (onPressed)
+                    onPressed();
+               else if (BonPressed)
+                    BonPressed(this);
 				held = true;
 			}
 		}
-
-		if (onHeld && held)
-			onHeld();
+		if (held)
+            if (onHeld)
+                onHeld();
+            else if (BonHeld)
+                BonHeld(this);
 	}
-
-	
 
 	Button() {}
 };
 
 
-struct VoidButton : protected scriptBase {
+struct VoidButton : public scriptBase {
     constexpr static const char* name = "VoidButton";
     bool inParent = false;
 
@@ -206,7 +219,9 @@ struct VoidButton : protected scriptBase {
 	void (*onReleased)(void* val) = nullptr;
 
 	void start() override {
-		textScr = new TextBox();
+        scrName = name;
+
+        textScr = new TextBox();
 
 		textObj = createObj("square");
 		textScr->text = "Button";
@@ -222,7 +237,7 @@ struct VoidButton : protected scriptBase {
         textObj->setRelativeDepth(0.05f);
         textObj->setToRelative();
 
-        addObjScript(textObj, (void*)textScr, textScr->name);
+        addObjScript(textObj, (void*)textScr);
 	}
 
 
@@ -288,6 +303,8 @@ struct TextField : public ButtonMain {
 	Vec4 color = Vec4(0, 0, 0, 1);
 
 	void cStart() override {
+        scrName = name;
+
 		textScr->text = emptyText;
 		textScr->fontColor = emptyColor;
 		textScr->mode = TEXT_LINE_LEFT_RENDER;
@@ -355,6 +372,8 @@ struct DropDownFieldDynamic : public ButtonMain {
 	}
 
 	void cStart() override {
+        scrName = name;
+
         textScr->text = unknownMessage;
         textScr->textUpdate();
 
@@ -390,7 +409,7 @@ struct DropDownFieldDynamic : public ButtonMain {
 
         newOption->transform.position = newObjPos;
         newOption->transform.scale = { thisObj->transform.scale.x, optionHeight };
-        addObjScript(newOption, (void*)newScr, newScr->name);
+        addObjScript(newOption, (void*)newScr);
         newOption->setDepth(background->getDepth() + 0.05f);
         *newScr->textScr = buttonText;
         newScr->textScr->text = option;
@@ -438,6 +457,8 @@ struct DropDownFieldStatic : public ButtonMain {
     }
 
     void cStart() override {
+        scrName = name;
+
         textScr->text = unknownMessage;
         textScr->textUpdate();
 
@@ -484,7 +505,7 @@ struct DropDownFieldStatic : public ButtonMain {
         newOption->setDependent(background);
         newOption->setRelativeDepth(0.05f);
         newOption->setToRelative();
-        addObjScript(newOption, (void*)newScr, newScr->name);
+        addObjScript(newOption, (void*)newScr);
         newScr->textObj->setDependent(background);
         *newScr->textScr = buttonText;
         newScr->textScr->text = option;

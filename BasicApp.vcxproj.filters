@@ -22,7 +22,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="glad\src\glad.c" />
     <ClCompile Include="scripts\FlowControl.cpp">
       <Filter>Script Files</Filter>
     </ClCompile>
@@ -46,6 +45,12 @@
     </ClCompile>
     <ClCompile Include="scripts\GlobalScripts.cpp">
       <Filter>Script Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scripts\ProgUI.cpp">
+      <Filter>Script Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glad\src\glad.c">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +117,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="scripts\GlobalScripts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scripts\ProgUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

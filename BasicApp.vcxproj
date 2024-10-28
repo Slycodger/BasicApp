@@ -160,6 +160,7 @@ xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s</Command>
     <ClCompile Include="scripts\Main.cpp" />
     <ClCompile Include="scripts\Objects.cpp" />
     <ClCompile Include="scripts\ProgramControl.cpp" />
+    <ClCompile Include="scripts\ProgUI.cpp" />
     <ClCompile Include="scripts\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -182,6 +183,7 @@ xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s</Command>
     <ClInclude Include="scripts\MathConstants.h" />
     <ClInclude Include="scripts\OpenGL.h" />
     <ClInclude Include="scripts\ProgramControl.h" />
+    <ClInclude Include="scripts\ProgUI.h" />
     <ClInclude Include="scripts\Shapes.h" />
     <ClInclude Include="scripts\Text.h" />
     <ClInclude Include="scripts\TypeDefs.h" />

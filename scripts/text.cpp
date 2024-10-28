@@ -166,6 +166,10 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size,
 	cChar curChar;
 	float ratio = size.x / size.y;
 
+    if (text == "" || font == "" || fontSize == 0 || size.x == 0 || size.y == 0 || mode > 2) {
+        return;
+    }
+
 	//Draw text centered both vertically and horizontally
 	//Does a recurse function move to make things easier
 	if (mode == TEXT_CENTER_RENDER) {
@@ -385,6 +389,13 @@ void createTextTexture(uint& texture, float fontSize, float lineSize, Vec2 size,
 
 namespace Text {
 	void start() {
+        if (!loadFont("./fonts/CascadiaCode.ttf", "CascadiaCode")) {
+            std::cout << "Failed to load font\n";
+        }
+        if (!loadFont("./fonts/CascadiaCode-Light.ttf", "CascadiaCodeLight")) {
+            std::cout << "Failed to load font\n";
+        }
+
 		glGenFramebuffers(1, &FBO);
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
