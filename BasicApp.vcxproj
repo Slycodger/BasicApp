@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;.\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>.\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <Optimization>Disabled</Optimization>
@@ -129,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;.\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>.\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -148,7 +148,8 @@
     <PreBuildEvent>
       <Command>xcopy $(ProjectDir)shaders $(OutDir)shaders /y /i /e /s
 xcopy $(ProjectDir)freetype.dll $(OutDir) /y
-xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s</Command>
+xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s
+xcopy $(ProjectDir)textures $(OutDir)textures /y /i /e /s</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

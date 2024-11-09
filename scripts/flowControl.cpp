@@ -383,7 +383,7 @@ void clearObjChildren(Object*& obj) {
 	if (obj->children.size() == 0)
 		return;
 	for (auto child : obj->children) {
-		child->parent == nullptr;
+        deleteObj(child);
 	}
 	obj->children.clear();
 }

@@ -443,7 +443,6 @@ struct DropDownFieldStatic : public ButtonMain {
     float optionOffset = 0.01f;
     float objOffset = 0;
     float scrollSpeed = 0.1f;
-    float optionDistance = 0;
     float lowest = 0;
     std::string unknownMessage = "Select Option";
     std::string choice;
@@ -479,16 +478,17 @@ struct DropDownFieldStatic : public ButtonMain {
     void cUpdate() override {
         if (keyAction::scrollUp() && objOffset > 0)
             objOffset -= scrollSpeed;
-        if (keyAction::scrollDown() && objOffset < lowest)
+        if (keyAction::scrollDown() && objOffset < optionObjs.size() * (optionHeight + optionOffset))
             objOffset += scrollSpeed;
 
-        for (auto obj : optionObjs)
-            std::get<0>(obj)->relativeTransform.position.y = objOffset + std::get<1>(obj);
+        for (int i = 0; i < optionObjs.size(); i++)
+            std::get<0>(optionObjs[i])->relativeTransform.position.y = 
+            (i * (optionHeight + optionOffset)) + 
+            thisObj->transform.position.y - thisObj->transform.scale.y +
+            objOffset;
     }
 
     void addOption(std::string option) {
-        optionDistance -= optionHeight * 2 + optionOffset;
-
         Object* newOption = createObj("square");
         VoidButton* newScr = new VoidButton;
         newScr->inParent = true;
@@ -499,7 +499,7 @@ struct DropDownFieldStatic : public ButtonMain {
         void staticDropDownDelete(void* val);
         newScr->pressDelete = staticDropDownDelete;
 
-        newOption->transform.position = { thisObj->transform.position.x, thisObj->transform.position.y + optionDistance };
+        newOption->transform.position = { thisObj->transform.position.x, thisObj->transform.position.y };
         newOption->transform.scale = { thisObj->transform.scale.x, optionHeight };
         newOption->setParent(background);
         newOption->setDependent(background);
@@ -512,9 +512,10 @@ struct DropDownFieldStatic : public ButtonMain {
         newScr->textScr->textUpdate();
 
         optionObjs.push_back(std::pair<Object*, float> (newOption, newOption->relativeTransform.position.y));
+    }
 
-        lowest = thisObj->transform.position.y - newOption->relativeTransform.position.y;
-
+    void removeOption(int index) {
+        optionObjs.erase(optionObjs.begin() + index);
     }
 
     void selectOption(std::string option) {
