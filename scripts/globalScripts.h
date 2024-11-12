@@ -92,7 +92,7 @@ struct ButtonMain : public scriptBase {
         textObj->setRelativeDepth(0.05f);
         textObj->setToRelative();
 
-        addObjScript(textObj, (void*)textScr);
+        addObjScript(textObj, textScr);
 
 		cStart();
 	}
@@ -167,7 +167,7 @@ struct Button : public scriptBase {
         textObj->setParent(thisObj);
         textObj->setRelativeDepth(0.05f);
 
-		addObjScript(textObj, (void*)textScr);
+		addObjScript(textObj, textScr);
 	}
 
 
@@ -248,7 +248,7 @@ struct VoidButton : public scriptBase {
         textObj->setRelativeDepth(0.05f);
         textObj->setToRelative();
 
-        addObjScript(textObj, (void*)textScr);
+        addObjScript(textObj, textScr);
 	}
 
 
@@ -419,7 +419,7 @@ struct DropDownFieldDynamic : public ButtonMain {
 
         newOption->transform.position = newObjPos;
         newOption->transform.scale = { thisObj->transform.scale.x, optionHeight };
-        addObjScript(newOption, (void*)newScr);
+        addObjScript(newOption, newScr);
         newOption->setDepth(background->getDepth() + 0.05f);
         *newScr->textScr = buttonText;
         newScr->textScr->text = option;
@@ -514,7 +514,7 @@ struct DropDownFieldStatic : public ButtonMain {
         newOption->setDependent(background);
         newOption->setRelativeDepth(0.05f);
         newOption->setToRelative();
-        addObjScript(newOption, (void*)newScr);
+        addObjScript(newOption, newScr);
         newScr->textObj->setDependent(background);
         *newScr->textScr = buttonText;
         newScr->textScr->text = option;
@@ -524,6 +524,7 @@ struct DropDownFieldStatic : public ButtonMain {
     }
 
     void removeOption(int index) {
+        deleteObj(std::get<0>(optionObjs[index]));
         optionObjs.erase(optionObjs.begin() + index);
     }
 
@@ -532,11 +533,6 @@ struct DropDownFieldStatic : public ButtonMain {
         textScr->textUpdate();
         onPressed();
         choice = option;
-    }
-
-    void end() override {
-        optionObjs.clear();
-        choice.~basic_string();
     }
 };
 

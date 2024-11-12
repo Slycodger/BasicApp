@@ -9,6 +9,9 @@ Object* button = nullptr;
 Button* buttonScr = nullptr;
 Vec2 offset;
 
+Object* dropDownFieldObj = nullptr;
+DropDownFieldStatic* dropDownScr = nullptr;
+
 const char* imageLoc = "textures/image.png";
 unsigned int buttonTexture = 0;
 
@@ -22,7 +25,6 @@ void onHeld(Button* button) {
 
 void progStart() {
     setBgColor(0.2, 0.3, 0.3, 0);
-
 
     button = createObj("square");
     button->transform.scale = 0.5;
@@ -56,13 +58,19 @@ void progStart() {
     buttonScr->BonHeld = onHeld;
 
 
-    addObjScript(button, (void*)buttonScr);
+    addObjScript(button, buttonScr);
 
     button->color = { 0.9, 0.9, 0.9, 0.7 };
     buttonScr->textScr->fontColor = { 1, 1, 1, 1 };
     buttonScr->textScr->fontSize = 0.2;
     buttonScr->textScr->text = "Drag to move";
     buttonScr->textScr->textUpdate();
+
+    dropDownFieldObj = createObj("square");
+    dropDownScr = new DropDownFieldStatic;
+
+    addObjScript(dropDownFieldObj, dropDownScr);
+    //dropDownScr->addOption("Option hey there");
 }
 
 

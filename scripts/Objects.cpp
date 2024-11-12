@@ -347,7 +347,6 @@ void updateObjScripts(Object*& obj) {
 void clearObjScripts(Object*& obj) {
     for (uint i = 0; i < ((ObjectBase*)obj)->scripts.size(); i++) {
         ((scriptBase*)((ObjectBase*)obj)->scripts[i])->end();
-        ((scriptBase*)((ObjectBase*)obj)->scripts[i])->scrName.~basic_string();
         delete(((ObjectBase*)obj)->scripts[i]);
     }
     ((ObjectBase*)obj)->scripts.clear();
