@@ -10,6 +10,7 @@
 
 struct TextBox : public scriptBase {
     constexpr static const char* name = "TextBox";
+    Object* thisObj = nullptr;
 
 	std::string text;
 	std::string font = "CascadiaCode_NORMAL";
@@ -21,6 +22,7 @@ struct TextBox : public scriptBase {
 	Vec4 fontColor = 1;
 
 	void start() override {
+        thisObj = (Object*)vThisObj;
         scrName = name;
 
 		thisObj->setTexture(texture);
@@ -64,12 +66,14 @@ private :
 
 struct ButtonMain : public scriptBase {
     constexpr static const char* name = "ButtonMain";
+    Object* thisObj = nullptr;
 
 	Object* textObj = nullptr;
 	TextBox* textScr = nullptr;
 	bool held = false;
 
 	void start() override {
+        thisObj = (Object*)vThisObj;
         scrName = name;
 
 		textScr = new TextBox();
@@ -130,6 +134,7 @@ struct ButtonMain : public scriptBase {
 
 struct Button : public scriptBase {
     constexpr static const char* name = "Button";
+    Object* thisObj = nullptr;
 
 	Object* textObj = nullptr;
 	TextBox* textScr = nullptr;
@@ -143,6 +148,8 @@ struct Button : public scriptBase {
 	void (*BonReleased)(Button*) = nullptr;
 
 	void start() override {
+        thisObj = (Object*)vThisObj;
+
         scrName = name;
 
 		textScr = new TextBox();
@@ -200,6 +207,8 @@ struct Button : public scriptBase {
 
 struct VoidButton : public scriptBase {
     constexpr static const char* name = "VoidButton";
+    Object* thisObj = nullptr;
+
     bool inParent = false;
 
     Object* textObj = nullptr;
@@ -219,6 +228,8 @@ struct VoidButton : public scriptBase {
 	void (*onReleased)(void* val) = nullptr;
 
 	void start() override {
+        thisObj = (Object*)vThisObj;
+
         scrName = name;
 
         textScr = new TextBox();
@@ -352,8 +363,7 @@ struct TextField : public ButtonMain {
 };
 
 
-struct DropDownFieldDynamic : public ButtonMain {
-    
+struct DropDownFieldDynamic : public ButtonMain { 
     constexpr static const char* name = "DropDownFieldDynamic";
 
     std::string unknownMessage = "Select Option";
@@ -435,7 +445,6 @@ struct DropDownFieldDynamic : public ButtonMain {
 
 
 struct DropDownFieldStatic : public ButtonMain {
-
     constexpr static const char* name = "DropDownFieldStatic";
 
     float height = 0.5f;

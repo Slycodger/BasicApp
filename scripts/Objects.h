@@ -2,6 +2,12 @@
 #if defined(_OBJECTS) || defined(_FLOW_CONTROL)
 #include <map>
 #include <stdexcept>
+#include "Constants.h"
+#include <algorithm>
+#include "IntializeShader.h"
+#include "ObjScripts.h"
+#include "OpenGL.h"
+#include "GlobalVars.h"
 namespace Objects {
 	void start();
 	void end();
@@ -10,8 +16,8 @@ namespace Objects {
 
 #include "TypeDefs.h"
 #include "Vector.h"
-#include <string>
 #include <Set>
+#include <string>
 #include <Vector>
 #include <limits>
 #include "Shapes.h"
@@ -179,3 +185,24 @@ bool unloadBufferObj(std::string name);
 bool loadBufferObj(std::string name, uint* VBO, uint* EBO, uint* triCount);
 void deleteObjMapping();
 void createBufferObj(uint& VBO, uint& EBO, const float vertices[], const uint indices[], const size_t vertSize, const size_t indiceSize);
+void addObjScript(Object*& obj, void* script);
+void removeObjScript(Object*& obj, unsigned int index);
+unsigned int getObjScriptIndex(Object*& obj, std::string name);
+void updateObjScripts(Object*& obj);
+void clearObjScripts(Object*& obj);
+void updateObjChildren(Object*& obj);
+void* getObjScript(Object*& obj, std::string name);
+void clearObjChildren(Object*& obj);
+void deleteObj(Object*& obj);
+void deleteObj(uint index);
+void deleteAll();
+bool objCmp(const ObjectBase* obj1, const ObjectBase* obj2);
+void drawObjStencil(Object* obj);
+void drawAllObjs();
+uint findObjSlot();
+bool addGlobalObj(ObjectBase*& obj);
+void changeProjectionToOrtho(float width, float near, float depth);
+void changeProjectionToPerp(float FOV, float near, float depth);
+
+extern ObjectBase* globalObjects[];
+extern uint objCount;
