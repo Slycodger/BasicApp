@@ -5,7 +5,6 @@
 #include "Constants.h"
 #include <algorithm>
 #include "IntializeShader.h"
-#include "ObjScripts.h"
 #include "OpenGL.h"
 #include "GlobalVars.h"
 namespace Objects {
@@ -14,6 +13,7 @@ namespace Objects {
 }
 #endif
 
+#include "ObjScripts.h"
 #include "TypeDefs.h"
 #include "Vector.h"
 #include <Set>
@@ -23,9 +23,10 @@ namespace Objects {
 #include "Shapes.h"
 #include <iostream>
 #include "MathConstants.h"
+#include <type_traits>
 
 struct ObjectBase {
-	uint index = 0;
+	int index = -1;
 	uint *texTarget = nullptr;
 	uint *VBO = nullptr;
 	uint *EBO = nullptr;
@@ -33,7 +34,7 @@ struct ObjectBase {
 	std::vector<void*> scripts;
 	float depth = 0;
 	float relativeDepth = 0;
-	ObjectBase() : index(0), texTarget(nullptr), VBO(nullptr), EBO(nullptr), triCount(nullptr), scripts(), depth(0), relativeDepth(0) {}
+	ObjectBase() : index(-1), texTarget(nullptr), VBO(nullptr), EBO(nullptr), triCount(nullptr), scripts(), depth(0), relativeDepth(0) {}
 };
 
 struct Transform {
@@ -54,12 +55,50 @@ struct Object : private ObjectBase {
 	Vec4 color = 1;
 	bool weak = false;
 	bool active = true;
+    std::string objType;
+    bool scriptCreated = false;
+    
+
+    Object& operator=(Object* obj) {
+        this->transform = obj->transform;
+
+        void addObjScript(Object * obj, void* script, char c);
+        for (auto& scrV : ((ObjectBase*)obj)->scripts) {
+            void* newScr = ((scriptBase*)scrV)->getNew();
+            addObjScript(this, newScr, 'c');
+        }
+
+        for (auto child : obj->children) {
+            if (child->scriptCreated)
+                continue;
+            Object* temp = new Object;
+            *temp = child;
+            temp->setParent(this);
+        }
+
+        this->color = obj->color;
+        this->weak = obj->weak;
+        this->active = obj->active;
+        this->objType = obj->objType;
+
+        ObjectBase* base = (ObjectBase*)this;
+        ObjectBase* objBase = (ObjectBase*)obj;
+
+        base->texTarget = objBase->texTarget;
+        base->VBO = objBase->VBO;
+        base->EBO = objBase->EBO;
+        base->triCount = objBase->triCount;
+        base->depth = objBase->depth;
+        base->relativeDepth = objBase->relativeDepth;
+
+        return *this;
+    }
 
 
 	//-------------------Constructor
     //-------------------Destructor
 
-	Object() : transform(), relativeTransform(), children(), dependencies(), parent(nullptr), color(1), weak(false), active(true) {}
+	Object() : transform(), relativeTransform(), children(), dependencies(), parent(nullptr), color(1), weak(false), active(true), scriptCreated(false) {}
     ~Object() {}
 
 	//--------------------------getter functions
@@ -85,7 +124,16 @@ struct Object : private ObjectBase {
 	float getRelativeDepth() {
 		return relativeDepth;
 	}
-
+    
+    template <typename T>
+    T* getScript() {
+        for (auto scrV : ((ObjectBase*)this)->scripts) {
+            scriptBase* scr = (scriptBase*)scrV;
+            if (scr->getName() == T::name)
+                return (T*)scrV;
+        }
+    }
+    
 
 	//-------------------------Setter functions
 
@@ -112,11 +160,9 @@ struct Object : private ObjectBase {
 	//-------------------------Parenting functions
 
 	void setParent(Object* obj) {
-		if (parent == obj)
-			return;
 		if (parent != nullptr)
 			parent->children.erase(this);
-		obj->children.insert(this);
+        obj->children.insert(this);
 		parent = obj;
 		relativeTransform.position = (transform.position - parent->transform.position) / parent->transform.scale;
 		relativeTransform.scale = transform.scale / parent->transform.scale;
@@ -142,6 +188,7 @@ struct Object : private ObjectBase {
 		if (parent == nullptr)
 			return;
 		parent->children.erase(this);
+
 		parent = nullptr;
 	}
 
@@ -185,16 +232,15 @@ bool unloadBufferObj(std::string name);
 bool loadBufferObj(std::string name, uint* VBO, uint* EBO, uint* triCount);
 void deleteObjMapping();
 void createBufferObj(uint& VBO, uint& EBO, const float vertices[], const uint indices[], const size_t vertSize, const size_t indiceSize);
-void addObjScript(Object*& obj, void* script);
-void removeObjScript(Object*& obj, unsigned int index);
+void addObjScript(Object* obj, void* script);
+void removeObjScript(Object* obj, unsigned int index);
 unsigned int getObjScriptIndex(Object*& obj, std::string name);
 void updateObjScripts(Object*& obj);
-void clearObjScripts(Object*& obj);
+void clearObjScripts(Object* const& obj);
 void updateObjChildren(Object*& obj);
-void* getObjScript(Object*& obj, std::string name);
 void clearObjChildren(Object*& obj);
 void deleteObj(Object*& obj);
-void deleteObj(uint index);
+void deleteObj(Object*& obj, int);
 void deleteAll();
 bool objCmp(const ObjectBase* obj1, const ObjectBase* obj2);
 void drawObjStencil(Object* obj);
@@ -203,6 +249,13 @@ uint findObjSlot();
 bool addGlobalObj(ObjectBase*& obj);
 void changeProjectionToOrtho(float width, float near, float depth);
 void changeProjectionToPerp(float FOV, float near, float depth);
+Object* createObj();
+Object* instantiateObj(std::string objName);
+bool saveObj(Object* obj, std::string objName);
+void addObjScript(Object* obj, void* script, char c);
+void deleteObj(Object*& obj, const char);
+void startObject(Object* obj);
+void createScriptObjs(std::pair<std::vector<std::string>, std::vector<void*>&> pair);
 
 extern ObjectBase* globalObjects[];
 extern uint objCount;

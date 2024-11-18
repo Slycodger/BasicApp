@@ -4,12 +4,10 @@
 #include "Text.h"
 #include "GlobalVars.h"
 #include "Input.h"
-#ifndef _FLOW_CONTROL
-#include "FlowControl.h"
-#endif
 
 struct TextBox : public scriptBase {
     constexpr static const char* name = "TextBox";
+    std::vector<void*> startObjs;
     Object* thisObj = nullptr;
 
 	std::string text;
@@ -21,9 +19,23 @@ struct TextBox : public scriptBase {
 	uint mode = 0;
 	Vec4 fontColor = 1;
 
+    std::pair<std::vector<std::string>, std::vector<void*>&> objsNeeded() override {
+        return std::pair<std::vector<std::string>, std::vector<void*>&>(std::vector<std::string> { }, startObjs);
+    }
+
+    void* getNew() override {
+        return new TextBox;
+    }
+
+    const std::string getName() const override {
+        return TextBox::name;
+    }
+
 	void start() override {
+        if (started)
+            return;
+        started = true;
         thisObj = (Object*)vThisObj;
-        scrName = name;
 
 		thisObj->setTexture(texture);
 		createTextTexture(texture, fontSize, lineSize, thisObj->transform.scale, yStart, margin, mode, font, text);
@@ -66,19 +78,35 @@ private :
 
 struct ButtonMain : public scriptBase {
     constexpr static const char* name = "ButtonMain";
+    std::vector<void*> startObjs;
     Object* thisObj = nullptr;
 
 	Object* textObj = nullptr;
 	TextBox* textScr = nullptr;
 	bool held = false;
 
+    std::pair<std::vector<std::string>, std::vector<void*>&> objsNeeded() override {
+        return std::pair<std::vector<std::string>, std::vector<void*>&>(std::vector<std::string> { "square" }, startObjs);
+    }
+
+    void* getNew() override {
+        return new ButtonMain;
+    }
+
+    const std::string getName() const override {
+        return ButtonMain::name;
+    }
+
 	void start() override {
+        if (started)
+            return;
+        started = true;
+
         thisObj = (Object*)vThisObj;
-        scrName = name;
 
 		textScr = new TextBox();
 
-		textObj = createObj("square");
+        textObj = (Object*)startObjs[0];
 		textScr->text = "Button";
 		textScr->font = "CascadiaCode_SMALL";
 		textScr->fontSize = 0.5;
@@ -105,12 +133,8 @@ struct ButtonMain : public scriptBase {
 			return;
 		}
 
-		float left = thisObj->transform.position.x - thisObj->transform.scale.x;
-		float right = thisObj->transform.position.x + thisObj->transform.scale.x;
-		float bottom = thisObj->transform.position.y - thisObj->transform.scale.y;
-		float top = thisObj->transform.position.y + thisObj->transform.scale.y;
 		if (keyAction::keyPressed(GLFW_MOUSE_BUTTON_1)) {
-			if (_mousePosX <= right && _mousePosX >= left && _mousePosY <= top && _mousePosY >= bottom) {
+			if (mouseWithin(thisObj)) {
 					onPressed();
 				held = true;
 			}
@@ -128,6 +152,14 @@ struct ButtonMain : public scriptBase {
 	virtual void onHeld() {}
 	virtual void onReleased() {}
 
+    static bool mouseWithin(Object*& obj) {
+        float left = obj->transform.position.x - obj->transform.scale.x;
+        float right = obj->transform.position.x + obj->transform.scale.x;
+        float bottom = obj->transform.position.y - obj->transform.scale.y;
+        float top = obj->transform.position.y + obj->transform.scale.y;
+        return _mousePosX <= right && _mousePosX >= left && _mousePosY <= top && _mousePosY >= bottom;
+    }
+
 	ButtonMain() {}
 };
 
@@ -135,6 +167,7 @@ struct ButtonMain : public scriptBase {
 struct Button : public scriptBase {
     constexpr static const char* name = "Button";
     Object* thisObj = nullptr;
+    std::vector<void*> startObjs;
 
 	Object* textObj = nullptr;
 	TextBox* textScr = nullptr;
@@ -147,14 +180,28 @@ struct Button : public scriptBase {
 	void (*onReleased)() = nullptr;
 	void (*BonReleased)(Button*) = nullptr;
 
-	void start() override {
-        thisObj = (Object*)vThisObj;
+    std::pair<std::vector<std::string>, std::vector<void*>&> objsNeeded() override {
+        return std::pair<std::vector<std::string>, std::vector<void*>&>(std::vector<std::string> { "square" }, startObjs);
+    }
 
-        scrName = name;
+    void* getNew() override {
+        return new Button;
+    }
+
+    const std::string getName() const override {
+        return Button::name;
+    }
+
+	void start() override {
+        if (started)
+            return;
+        started = true;
+
+        thisObj = (Object*)vThisObj;
 
 		textScr = new TextBox();
 
-		textObj = createObj("square");
+        textObj = (Object*)startObjs[0];
 		textScr->text = "Button";
 		textScr->font = "CascadiaCode_NORMAL";
 		textScr->fontSize = 0.5;
@@ -207,6 +254,7 @@ struct Button : public scriptBase {
 
 struct VoidButton : public scriptBase {
     constexpr static const char* name = "VoidButton";
+    std::vector<void*> startObjs;
     Object* thisObj = nullptr;
 
     bool inParent = false;
@@ -227,14 +275,28 @@ struct VoidButton : public scriptBase {
 	void (*onHeld)(void* val) = nullptr;
 	void (*onReleased)(void* val) = nullptr;
 
-	void start() override {
-        thisObj = (Object*)vThisObj;
+    std::pair<std::vector<std::string>, std::vector<void*>&> objsNeeded() override {
+        return std::pair<std::vector<std::string>, std::vector<void*>&>(std::vector<std::string> { "square" }, startObjs);
+    }
 
-        scrName = name;
+    void* getNew() override {
+        return new VoidButton;
+    }
+
+    const std::string getName() const override {
+        return VoidButton::name;
+    }
+
+	void start() override {
+        if (started)
+            return;
+        started = true;
+
+        thisObj = (Object*)vThisObj;
 
         textScr = new TextBox();
 
-		textObj = createObj("square");
+		textObj = (Object*)startObjs[0];
 		textScr->text = "Button";
 		textScr->font = "CascadiaCode_SMALL";
 		textScr->fontSize = 0.5;
@@ -313,9 +375,19 @@ struct TextField : public ButtonMain {
 	Vec4 emptyColor = Vec4(0.7, 0.7, 0.7, 1);
 	Vec4 color = Vec4(0, 0, 0, 1);
 
-	void cStart() override {
-        scrName = name;
+    std::pair<std::vector<std::string>, std::vector<void*>&> objsNeeded() override {
+        return std::pair<std::vector<std::string>, std::vector<void*>&>(std::vector<std::string> { "square" }, startObjs);
+    }
 
+    const std::string getName() const override {
+        return TextField::name;
+    }
+
+    void* getNew() override {
+        return new TextField;
+    }
+
+	void cStart() override {
 		textScr->text = emptyText;
 		textScr->fontColor = emptyColor;
 		textScr->mode = TEXT_LINE_LEFT_RENDER;
@@ -369,44 +441,61 @@ struct DropDownFieldDynamic : public ButtonMain {
     std::string unknownMessage = "Select Option";
 	float optionHeight = 0.125f;
 	float optionOffset = 0.01f;
-	Vec2 newObjPos = 0;
 	std::string choice;
 	TextBox buttonText;
     Object* background = nullptr;
     std::vector<Object*> optionObjs;
 
+    std::pair<std::vector<std::string>, std::vector<void*>&> objsNeeded() override {
+        return std::pair<std::vector<std::string>, std::vector<void*>&>(std::vector<std::string> { "square", "square" }, startObjs);
+    }
+
+    const std::string getName() const override {
+        return DropDownFieldDynamic::name;
+    }
+
+    void* getNew() override {
+        return new DropDownFieldDynamic;
+    }
+
 	void onPressed() override {
         background->active = !background->active;
-        for (auto& obj : optionObjs)
-            obj->active = !obj->active;
 	}
 
 	void cStart() override {
-        scrName = name;
-
         textScr->text = unknownMessage;
         textScr->textUpdate();
 
-        background = createObj("square");
+        background = (Object*)startObjs[1];
         background->transform.position = thisObj->transform.position;
         background->transform.position.y -= thisObj->transform.scale.y;
         background->transform.scale = { thisObj->transform.scale.x, 0 };
         background->setDepth(thisObj->getDepth() + 0.05f);
         background->color = Vec4{ 0.7, 0.7, 0.7, 1 };
-
-        newObjPos = background->transform.position;
-        newObjPos.y += optionHeight;
-
-        addOption(unknownMessage);
+        background->setParent(thisObj);
 
         onPressed();
 	}
 
+    void cUpdate() override {
+        if (keyAction::keyPressed(0) && background->active && !ButtonMain::mouseWithin(background) && !ButtonMain::mouseWithin(thisObj))
+            onPressed();
+
+        if (background->active)
+            for (int i = 0; i < optionObjs.size(); i++)
+                optionObjs[i]->relativeTransform.position.y = ((thisObj->transform.position.y - thisObj->transform.scale.y -
+                    optionHeight - optionOffset -
+                    i * (2 * optionHeight + optionOffset)) -
+                    background->transform.position.y) / background->transform.scale.y;
+    }
+
 	void addOption(std::string option) {
-        background->transform.scale.y += optionHeight + optionOffset / 2;
-        background->transform.position.y -= optionHeight + optionOffset / 2;
+        background->relativeTransform.scale.y += (optionHeight + optionOffset) / thisObj->transform.scale.y;
+        background->relativeTransform.position.y -= (optionHeight + optionOffset) / thisObj->transform.scale.y;
         background->setToRelative();
-        newObjPos.y -= optionHeight * 2 + optionOffset;
+
+        for (Object*& i : optionObjs)
+            i->setParent(background);
 
         Object* newOption = createObj("square");
         VoidButton* newScr = new VoidButton;
@@ -417,14 +506,14 @@ struct DropDownFieldDynamic : public ButtonMain {
         void dynamicDropDownDelete(void* val);
         newScr->pressDelete = dynamicDropDownDelete;
 
-        newOption->transform.position = newObjPos;
+        newOption->transform.position = background->transform.position;
         newOption->transform.scale = { thisObj->transform.scale.x, optionHeight };
-        addObjScript(newOption, newScr);
         newOption->setDepth(background->getDepth() + 0.05f);
+        newOption->setParent(background);
+        addObjScript(newOption, newScr);
         *newScr->textScr = buttonText;
         newScr->textScr->text = option;
         newScr->textScr->textUpdate();
-
 
         optionObjs.push_back(newOption);
 
@@ -436,6 +525,21 @@ struct DropDownFieldDynamic : public ButtonMain {
         onPressed();
         choice = option;
 	}
+
+    void removeOption(uint index) {
+        if (index >= optionObjs.size())
+            return;
+
+        background->relativeTransform.scale.y -= (optionHeight + optionOffset) / thisObj->transform.scale.y;
+        background->relativeTransform.position.y += (optionHeight + optionOffset) / thisObj->transform.scale.y;
+        background->setToRelative();
+
+        for (Object*& i : optionObjs)
+            i->setParent(background);
+
+        deleteObj(optionObjs[index]);
+        optionObjs.erase(optionObjs.begin() + index);
+    }
 
 	void end() override {
 		optionObjs.clear();
@@ -452,12 +556,23 @@ struct DropDownFieldStatic : public ButtonMain {
     float optionOffset = 0.01f;
     float objOffset = 0;
     float scrollSpeed = 0.1f;
-    float lowest = 0;
     std::string unknownMessage = "Select Option";
     std::string choice;
     TextBox buttonText;
     Object* background = nullptr;
-    std::vector<std::pair<Object*, float>> optionObjs;
+    std::vector<Object*> optionObjs;
+
+    std::pair<std::vector<std::string>, std::vector<void*>&> objsNeeded() override {
+        return std::pair<std::vector<std::string>, std::vector<void*>&>(std::vector<std::string> { "square", "square" }, startObjs);
+    }
+
+    void* getNew() override {
+        return new DropDownFieldStatic;
+    }
+
+    const std::string getName() const override {
+        return DropDownFieldStatic::name;
+    }
 
     void onPressed() override {
         background->active = !background->active;
@@ -465,12 +580,10 @@ struct DropDownFieldStatic : public ButtonMain {
     }
 
     void cStart() override {
-        scrName = name;
-
         textScr->text = unknownMessage;
         textScr->textUpdate();
 
-        background = createObj("square");
+        background = (Object*)startObjs[1];
         background->transform.position = thisObj->transform.position;
         background->transform.position.y -= thisObj->transform.scale.y + height;
         background->transform.scale = { thisObj->transform.scale.x, height };
@@ -478,23 +591,24 @@ struct DropDownFieldStatic : public ButtonMain {
         background->setToRelative();
         background->color = Vec4{ 0.7, 0.7, 0.7, 1 };
 
-        addOption(unknownMessage);
-
         onPressed();
-
     }
 
     void cUpdate() override {
         if (keyAction::scrollUp() && objOffset > 0)
             objOffset -= scrollSpeed;
-        if (keyAction::scrollDown() && objOffset < optionObjs.size() * (optionHeight + optionOffset))
+        if (keyAction::scrollDown() && objOffset < optionObjs.size() * (2 * optionHeight + optionOffset))
             objOffset += scrollSpeed;
 
-        for (int i = 0; i < optionObjs.size(); i++)
-            std::get<0>(optionObjs[i])->relativeTransform.position.y = 
-            (i * (optionHeight + optionOffset)) + 
-            thisObj->transform.position.y - thisObj->transform.scale.y +
-            objOffset;
+        if (keyAction::keyPressed(0) && background->active && !ButtonMain::mouseWithin(background) && !ButtonMain::mouseWithin(thisObj))
+            onPressed();
+
+        if (background->active)
+            for (int i = 0; i < optionObjs.size(); i++)
+                optionObjs[i]->relativeTransform.position.y = ((thisObj->transform.position.y - thisObj->transform.scale.y -
+                    optionHeight - optionOffset - 
+                    i * (2 * optionHeight + optionOffset) + objOffset) -
+                    background->transform.position.y) / background->transform.scale.y;
     }
 
     void addOption(std::string option) {
@@ -520,11 +634,14 @@ struct DropDownFieldStatic : public ButtonMain {
         newScr->textScr->text = option;
         newScr->textScr->textUpdate();
 
-        optionObjs.push_back(std::pair<Object*, float> (newOption, newOption->relativeTransform.position.y));
+        optionObjs.push_back(newOption);
     }
 
-    void removeOption(int index) {
-        deleteObj(std::get<0>(optionObjs[index]));
+    void removeOption(uint index) {
+        if (index >= optionObjs.size())
+            return;
+
+        deleteObj(optionObjs[index]);
         optionObjs.erase(optionObjs.begin() + index);
     }
 
@@ -535,4 +652,3 @@ struct DropDownFieldStatic : public ButtonMain {
         choice = option;
     }
 };
-

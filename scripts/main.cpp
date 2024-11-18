@@ -3,17 +3,28 @@
 #include "flowControl.h"
 #include "globalScripts.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "textureLoading.h"
+#include "soundLoading.h"
 
 Object* button = nullptr;
 Button* buttonScr = nullptr;
 Vec2 offset;
 
 Object* dropDownFieldObj = nullptr;
-DropDownFieldStatic* dropDownScr = nullptr;
+DropDownFieldDynamic* dropDownScr = nullptr;
 
-const char* imageLoc = "textures/image.png";
+const char* imageLoc = "image.png";
 unsigned int buttonTexture = 0;
+
+const char* soundLoc = "sounds/sound.mp3";
+const char* musicLoc = "sounds/funkyMusic.mp3";
+
+sf::SoundBuffer* sb = nullptr;
+
+Object* obj1 = nullptr;
+Object* obj1Child = nullptr;
+Object* obj2 = nullptr;
+Button* obj1Button = nullptr;
 
 void onPressed(Button* button) {
     offset = { button->thisObj->transform.position.x - _mousePosX, button->thisObj->transform.position.y - _mousePosY };
@@ -24,35 +35,24 @@ void onHeld(Button* button) {
 }
 
 void progStart() {
+    sb = new sf::SoundBuffer;
+    sb->loadFromFile(soundLoc);
+
     setBgColor(0.2, 0.3, 0.3, 0);
 
     button = createObj("square");
     button->transform.scale = 0.5;
+    button->setDepth(0.05f);
     buttonScr = new Button;
 
-    int iWidth, iHeight, iChannels = 0;
+    int iWidth, iHeight = 0;
 
-    glGenTextures(1, &buttonTexture);
-    glBindTexture(GL_TEXTURE_2D, buttonTexture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* imageData = stbi_load(imageLoc, &iWidth, &iHeight, &iChannels, 0);
-    if (imageData) {
+    if (loadTexture(imageLoc, buttonTexture, iWidth, iHeight)) {
         button->setTexture(buttonTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iWidth, iHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-        glGenerateMipmap(buttonTexture);
-        
         button->transform.scale.x = 0.5 * (float)iWidth / iHeight;
     }
-    else {
+    else
         std::cout << "Failed to load texture\n";
-    }
-    stbi_image_free(imageData);
 
     buttonScr->BonPressed = onPressed;
     buttonScr->BonHeld = onHeld;
@@ -67,20 +67,109 @@ void progStart() {
     buttonScr->textScr->textUpdate();
 
     dropDownFieldObj = createObj("square");
-    dropDownScr = new DropDownFieldStatic;
+
+    dropDownFieldObj->transform.scale = { 0.3, 0.2 };
+    dropDownFieldObj->transform.position = { -_screenRatio + 0.3f, 1 - 0.2f };
+
+    dropDownScr = new DropDownFieldDynamic;
+
+    dropDownScr->buttonText.fontColor = { 0, 0, 0, 1 };
+    dropDownScr->buttonText.mode = TEXT_CENTER_RENDER;
+    dropDownScr->buttonText.fontSize = 0.3f;
+    dropDownScr->buttonText.lineSize = 0.31f;
 
     addObjScript(dropDownFieldObj, dropDownScr);
-    //dropDownScr->addOption("Option hey there");
+    dropDownScr->textScr->text = "Yes or No";
+    dropDownScr->textScr->textUpdate();
+    dropDownScr->addOption("Option hey there");
+    dropDownScr->optionObjs[0]->active = true;
+    dropDownScr->addOption("Yes");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("No");
+    dropDownScr->addOption("EA");
+    dropDownScr->addOption("EA");
+    dropDownScr->addOption("EA");
+    dropDownScr->addOption("EA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("BA");
+    dropDownScr->addOption("CA");
+
+    obj1 = createObj("square");
+    obj1Child = createObj("square");
+    obj1Button = new Button;
+
+    addObjScript(obj1, obj1Button);
+    obj1->transform.scale = { 0.2, 0.2 };
+    obj1Child->transform.scale = { 0.1, 0.1 };
+    obj1Child->transform.position.y += 0.4;
+    obj1Child->setParent(obj1);
+    
+    saveObj(obj1, "parentChildTest");
+
+    obj2 = instantiateObj("parentChildTest");
+    if (obj2)
+        obj2->transform.position.x += 0.5;
 }
 
-
+int musicIndex = 0;
 void progMain() {
     if (keyAction::keyPressed(GLFW_KEY_SPACE))
         progUI::fps();
     if (keyAction::keyPressed(GLFW_KEY_A))
         _vsync = !_vsync;
+
+    if (keyAction::keyPressed(GLFW_KEY_B))
+        dropDownScr->removeOption(0);
+
+    if (keyAction::keyHeld(GLFW_KEY_UP))
+        dropDownFieldObj->transform.position.y += 0.05 * _deltaTime;
+    if (keyAction::keyHeld(GLFW_KEY_DOWN))
+        dropDownFieldObj->transform.position.y -= 0.05 * _deltaTime;
+    if (keyAction::keyHeld(GLFW_KEY_LEFT))
+        dropDownFieldObj->transform.position.x -= 0.05 * _deltaTime;
+    if (keyAction::keyHeld(GLFW_KEY_RIGHT))
+        dropDownFieldObj->transform.position.x += 0.05 * _deltaTime;
+
+    if (keyAction::keyPressed(GLFW_KEY_ENTER))
+        playSound(*sb);
+
+    if (keyAction::keyPressed(GLFW_KEY_KP_0))
+        if (musicLoaded(musicIndex)) {
+            if (!musicPlaying(musicIndex))
+                startMusic(musicIndex);
+        }
+        else
+            musicIndex = playMusic(musicLoc);
+
+    if (keyAction::keyPressed(GLFW_KEY_KP_1))
+        if (musicLoaded(musicIndex))
+            pauseMusic(musicIndex);
+
+    if (keyAction::keyPressed(GLFW_KEY_KP_2))
+        if (musicLoaded(musicIndex))
+            stopMusic(musicIndex);
 }
 
 void progEnd() {
     glDeleteTextures(1, &buttonTexture);
+    delete sb;
 }

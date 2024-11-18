@@ -52,6 +52,12 @@
     <ClCompile Include="glad\src\glad.c">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="scripts\textureLoading.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scripts\sound.cpp">
+      <Filter>Script Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\NTVertexShader.vert">
@@ -120,6 +126,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="scripts\ProgUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scripts\textureLoading.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scripts\soundLoading.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

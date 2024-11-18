@@ -16,7 +16,7 @@ namespace ProgUI {
         UIFPSScr->text = "FPS : ";
         UIFPSScr->font = "CascadiaCode_BIG";
         UIFPSScr->fontSize = 1;
-        addObjScript(UIFPSObj, (void*)UIFPSScr);
+        addObjScript(UIFPSObj, UIFPSScr);
 
         UIFPSObj->active = false;
     }

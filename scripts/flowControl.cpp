@@ -28,16 +28,20 @@ void start() {
     Text::start();
     Objects::start();
     ProgUI::start();
+    Sound::start();
 
 
 	addShader("noTextureShader", "./shaders/NTVertexShader.vert", "./shaders/NTFragmentShader.frag");
 	addShader("textureShader", "./shaders/TVertexShader.vert", "./shaders/TFragmentShader.frag");
 
+    stbi_set_flip_vertically_on_load(true);
 
 	progStart();
 }
 
 void update() {
+    Sound::update();
+
     progMain();
     ProgUI::update();
 
@@ -54,11 +58,11 @@ void update() {
 void end() {
 	progEnd();
 	deleteAll();
-	deleteObjMapping();
 
 	Text::end();
 	Objects::end();
 	Shaders::end();
+    Sound::end();
 }
 
 

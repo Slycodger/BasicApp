@@ -108,7 +108,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;.\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;.\stb;.\sfml\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>.\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <Optimization>Disabled</Optimization>
@@ -117,8 +117,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>.\lib-vc2022;.\freeTypeDLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\lib-vc2022;.\freeTypeDLL;.\sfml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;sfml-audio-d.lib;sfml-system-d.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;.\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\glad\include;.\glm;.\glfw-3.4.bin.WIN64\include;.\freeTypeInclude;.\stb;.\sfml\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalUsingDirectories>.\glad\src;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -138,8 +138,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\lib-vc2022;.\freeTypeDLL;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;sfml-audio.lib;sfml-system.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\lib-vc2022;.\freeTypeDLL;.\sfml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -149,7 +149,9 @@
       <Command>xcopy $(ProjectDir)shaders $(OutDir)shaders /y /i /e /s
 xcopy $(ProjectDir)freetype.dll $(OutDir) /y
 xcopy $(ProjectDir)fonts $(OutDir)fonts /y /i /e /s
-xcopy $(ProjectDir)textures $(OutDir)textures /y /i /e /s</Command>
+xcopy $(ProjectDir)textures $(OutDir)textures /y /i /e /s
+xcopy $(ProjectDir)sounds $(OutDir)sounds /y /i /e /s
+xcopy $(ProjectDir)*.dll $(OutDir) /y</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -162,7 +164,9 @@ xcopy $(ProjectDir)textures $(OutDir)textures /y /i /e /s</Command>
     <ClCompile Include="scripts\Objects.cpp" />
     <ClCompile Include="scripts\ProgramControl.cpp" />
     <ClCompile Include="scripts\ProgUI.cpp" />
+    <ClCompile Include="scripts\sound.cpp" />
     <ClCompile Include="scripts\Text.cpp" />
+    <ClCompile Include="scripts\textureLoading.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\NTFragmentShader.frag" />
@@ -186,7 +190,9 @@ xcopy $(ProjectDir)textures $(OutDir)textures /y /i /e /s</Command>
     <ClInclude Include="scripts\ProgramControl.h" />
     <ClInclude Include="scripts\ProgUI.h" />
     <ClInclude Include="scripts\Shapes.h" />
+    <ClInclude Include="scripts\soundLoading.h" />
     <ClInclude Include="scripts\Text.h" />
+    <ClInclude Include="scripts\textureLoading.h" />
     <ClInclude Include="scripts\TypeDefs.h" />
     <ClInclude Include="scripts\Vector.h" />
   </ItemGroup>
